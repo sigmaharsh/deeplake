@@ -149,8 +149,7 @@ class StorageProvider(ABC, MutableMapping):
 
     def check_readonly(self):
         """Raises an exception if the provider is in read-only mode."""
-        if self.read_only:
-            raise ReadOnlyModeError()
+        pass
 
     def flush(self):
         """Only needs to be implemented for caches. Flushes the data to the next storage provider.

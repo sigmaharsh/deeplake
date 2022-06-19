@@ -200,16 +200,7 @@ class Dataset:
         d["_parent_dataset"] = None
 
         self.__dict__.update(d)
-        try:
-            self._set_derived_attributes()
-        except LockedException:
-            raise LockedException(
-                "This dataset cannot be open for writing as it is locked by another machine. Try loading the dataset with `read_only=True`."
-            )
-        except ReadOnlyModeError as e:
-            raise ReadOnlyModeError(
-                "This dataset cannot be open for writing as you don't have permissions. Try loading the dataset with `read_only=True."
-            )
+        self._set_derived_attributes()
         self._first_load_init()
         self._initial_autoflush: List[
             bool
@@ -941,8 +932,6 @@ class Dataset:
     def _lock(self, err=False):
         storage = self.base_storage
         if storage.read_only and not self._locked_out:
-            if err:
-                raise ReadOnlyModeError()
             return False
 
         if isinstance(storage, tuple(_LOCKABLE_STORAGES)) and (
@@ -2260,10 +2249,6 @@ class Dataset:
                     if isinstance(self, hub.core.dataset.HubCloudDataset):
                         vds = self._save_view_in_user_queries_dataset(
                             id, message, optimize, num_workers
-                        )
-                    else:
-                        raise ReadOnlyModeError(
-                            "Cannot save view in read only dataset. Speicify a path to save the view in a different location."
                         )
                 else:
                     vds = self._save_view_in_subdir(id, message, optimize, num_workers)
