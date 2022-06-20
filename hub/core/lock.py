@@ -143,6 +143,10 @@ class PersistentLock(Lock):
             return
 
     def acquire(self):
+        #### LOCKING DISABLED ####
+        self.acquired = True
+        return
+        ####
         if self.acquired:
             return
         self.storage.check_readonly()
@@ -165,6 +169,10 @@ class PersistentLock(Lock):
         self.acquired = True
 
     def release(self):
+        #### LOCKING DISABLED ####
+        self.acquired = False
+        return
+        ####
         if not self.acquired:
             return
         with self._thread_lock:
