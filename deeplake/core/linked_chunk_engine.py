@@ -1,7 +1,6 @@
 import deeplake
 from deeplake.core.chunk.base_chunk import BaseChunk
 from deeplake.core.chunk_engine import ChunkEngine
-from deeplake.core.chunk.uncompressed_chunk import UncompressedChunk
 from deeplake.core.compression import _read_video_shape, _decompress_video
 from deeplake.core.index.index import Index
 from deeplake.core.link_creds import LinkCreds
@@ -51,8 +50,6 @@ class LinkedChunkEngine(ChunkEngine):
         self.link_creds = link_creds
         self._creds_encoder: Optional[CredsEncoder] = None
         self._creds_encoder_commit_id: Optional[str] = None
-        self.chunk_class = UncompressedChunk
-        self.compression = None
 
     @property
     def creds_encoder(self) -> CredsEncoder:
