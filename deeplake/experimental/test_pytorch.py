@@ -492,8 +492,8 @@ def test_expiration_date_casting_to_string():
 @requires_torch
 @requires_libdeeplake
 @pytest.mark.parametrize("num_workers", [0, 2])
-def test_indexes(local_ds, num_workers):
-    shuffle = False
+@pytest.mark.parametrize("shuffle", [True, False])
+def test_indexes(local_ds, shuffle, num_workers):
     with local_ds as ds:
         ds.create_tensor("xyz")
         for i in range(8):
@@ -516,8 +516,8 @@ def test_indexes(local_ds, num_workers):
 @requires_torch
 @requires_libdeeplake
 @pytest.mark.parametrize("num_workers", [0, 2])
-def test_indexes_transform(local_ds, num_workers):
-    shuffle = False
+@pytest.mark.parametrize("shuffle", [True, False])
+def test_indexes_transform(local_ds, shuffle, num_workers):
     with local_ds as ds:
         ds.create_tensor("xyz")
         for i in range(8):
@@ -544,8 +544,8 @@ def test_indexes_transform(local_ds, num_workers):
 @requires_torch
 @requires_libdeeplake
 @pytest.mark.parametrize("num_workers", [0, 2])
-def test_indexes_transform_dict(local_ds, num_workers):
-    shuffle = False
+@pytest.mark.parametrize("shuffle", [True, False])
+def test_indexes_transform_dict(local_ds, shuffle, num_workers):
     with local_ds as ds:
         ds.create_tensor("xyz")
         for i in range(8):
@@ -581,8 +581,8 @@ def test_indexes_transform_dict(local_ds, num_workers):
 @requires_torch
 @requires_libdeeplake
 @pytest.mark.parametrize("num_workers", [0, 2])
-def test_indexes_tensors(local_ds, num_workers):
-    shuffle = False
+@pytest.mark.parametrize("shuffle", [True, False])
+def test_indexes_tensors(local_ds, shuffle, num_workers):
     with local_ds as ds:
         ds.create_tensor("xyz")
         for i in range(8):
