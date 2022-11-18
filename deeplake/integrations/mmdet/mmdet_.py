@@ -623,6 +623,8 @@ def build_dataloader(
     classes = dataset[labels_tensor].info.class_names
     dataset.CLASSES = classes
     if model:
+        if hasattr(model, "CLASSES"):
+            always_warn("The CLASSES was specified in the main, however it is going to be ignored as it is going to be inferred direclty from the dataset.")
         model.CLASSES = classes
     pipeline = build_pipeline(pipeline)
     metrics_format = train_loader_config.get("metrics_format")
