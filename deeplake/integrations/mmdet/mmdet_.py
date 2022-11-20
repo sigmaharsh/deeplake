@@ -32,6 +32,9 @@ from PIL import Image, ImageDraw
 import os
 
 
+f = open("logs.txt", "w")
+
+
 class Dummy:
     pass
 
@@ -634,6 +637,18 @@ def transform(
         gt_masks = BitmapMasks(masks, *shape[:2])
     else:
         gt_masks = None
+
+    import json
+
+    log = json.dumps(
+        {
+            "image.shape": img.shape,
+            "boxes.shape": np.array(bboxes).shape,
+            "labels.shape": labels.shape,
+        }
+    )
+    f.write(log)
+    f.write("\n")
 
     return pipeline(
         {
