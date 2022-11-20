@@ -565,7 +565,7 @@ def transform(
 
     img = np.random.randint(0, 100, (640, 390, 3), dtype=np.uint8)
     bboxes = np.random.uniform(0, 50, (10, 4)).astype(np.float32)
-    labels = np.random.randint(0, 80, (10, ), dtype=np.uint32)
+    labels = np.random.randint(0, 80, (10, ), dtype=labels.dtype)
 
     return pipeline(
         {
