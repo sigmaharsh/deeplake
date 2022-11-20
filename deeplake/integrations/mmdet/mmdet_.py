@@ -1013,6 +1013,9 @@ def _train_detector(
         **cfg.data.train.get("deeplake_dataloader", {}),
     }
 
+    if "shuffle" not in train_loader_cfg:
+        train_loader_cfg["shuffle"] = cfg.data.get("train_dataloader", {}).get("shuffle", True)
+
     data_loader = build_dataloader(
         ds_train,  # TO DO: convert it to for loop if we will suport concatting several datasets
         train_images_tensor,
