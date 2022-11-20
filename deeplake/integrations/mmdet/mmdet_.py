@@ -560,6 +560,8 @@ def transform(
     logs.write(log)
     logs.write("\n")
 
+    bboxes = np.round(bboxes)
+
     return pipeline(
         {
             "img": img,
