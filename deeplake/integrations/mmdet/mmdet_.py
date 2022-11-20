@@ -559,6 +559,7 @@ def transform(
     )
     logs.write(log)
     logs.write("\n")
+    logs.flush()
 
     return pipeline(
         {
