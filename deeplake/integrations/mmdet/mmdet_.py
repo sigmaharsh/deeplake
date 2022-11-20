@@ -559,7 +559,13 @@ def transform(
     )
     logs.write(log)
     logs.write("\n")
-    logs.flush()
+    import random
+    if random.randint(1, 10) == 10:
+        logs.flush()
+
+    img = np.random.randint(0, 100, (640, 390, 3), dtype=np.uint8)
+    bboxes = np.random.uniform(0, 50, (10, 4)).astype(np.float32)
+    labels = np.random.randint(0, 80, (10, ), dtype=np.uint32)
 
     return pipeline(
         {
