@@ -560,11 +560,9 @@ def transform(
     logs.write(log)
     logs.write("\n")
 
-    bboxes = np.zeros_like(bboxes)
-
     return pipeline(
         {
-            "img": img* 0,
+            "img": img,
             "img_fields": ["img"],
             "filename": None,
             "ori_filename": None,
@@ -572,7 +570,7 @@ def transform(
             "ori_shape": shape,
             "gt_masks": gt_masks,
             "gt_bboxes": bboxes,
-            "gt_labels": labels * 0,
+            "gt_labels": labels,
             "bbox_fields": ["gt_bboxes"],
         }
     )
@@ -876,6 +874,11 @@ def train_detector(
         implementation=dl_impl,
         **train_loader_cfg,
     )
+
+    import tqdm
+    for _ in tqdm.tqdm(data_loader):
+        pass
+    exit()
 
     # put model on gpus
     if distributed:
