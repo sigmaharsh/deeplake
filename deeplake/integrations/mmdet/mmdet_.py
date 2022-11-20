@@ -876,11 +876,6 @@ def train_detector(
         **train_loader_cfg,
     )
 
-    import tqdm
-    for _ in tqdm.tqdm(data_loader):
-        pass
-    exit()
-
     # put model on gpus
     if distributed:
         local_rank = int(os.environ["LOCAL_RANK"])
