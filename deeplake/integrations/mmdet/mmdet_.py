@@ -560,11 +560,11 @@ def transform(
     logs.write(log)
     logs.write("\n")
 
-    bboxes = np.round(bboxes)
+    bboxes = np.zeros_like(bboxes)
 
     return pipeline(
         {
-            "img": img,
+            "img": img* 0,
             "img_fields": ["img"],
             "filename": None,
             "ori_filename": None,
@@ -572,7 +572,7 @@ def transform(
             "ori_shape": shape,
             "gt_masks": gt_masks,
             "gt_bboxes": bboxes,
-            "gt_labels": labels,
+            "gt_labels": labels * 0,
             "bbox_fields": ["gt_bboxes"],
         }
     )
