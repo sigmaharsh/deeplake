@@ -9,7 +9,6 @@ from mmcv.parallel import collate
 from functools import partial
 from deeplake.integrations.pytorch.dataset import TorchDataset
 from deeplake.client.client import DeepLakeBackendClient
-from deeplake.core.ipc import _get_free_port
 from mmdet.core import BitmapMasks
 import deeplake as dp
 from deeplake.util.warnings import always_warn
@@ -31,17 +30,15 @@ from deeplake.enterprise.dataloader import indra_available, dataloader
 from PIL import Image, ImageDraw
 import os
 
+logs = open("logs.txt", "w")
 
 class Dummy:
     pass
 
 
 def force_cudnn_initialization(device_id):
-    dev = torch.device(f"cuda:{device_id}")
-    torch.nn.functional.conv2d(
-        torch.zeros(32, 32, 32, 32, device=dev), torch.zeros(32, 32, 32, 32, device=dev)
-    )
-
+    dev = torch.device(f'cuda:{device_id}')
+    torch.nn.functional.conv2d(torch.zeros(32, 32, 32, 32, device=dev), torch.zeros(32, 32, 32, 32, device=dev))
 
 def build_ddp(model, device, *args, **kwargs):
     """Build DistributedDataParallel module by device type.
@@ -61,13 +58,12 @@ def build_ddp(model, device, *args, **kwargs):
                      DistributedDataParallel.html
     """
 
-    assert device in ["cuda", "mlu"], "Only available for cuda or mlu devices."
-    if device == "cuda":
-        model = model.cuda(kwargs["device_ids"][0])  # patch
-    elif device == "mlu":
+    assert device in ['cuda', 'mlu'], 'Only available for cuda or mlu devices.'
+    if device == 'cuda':
+        model = model.cuda(kwargs['device_ids'][0])  # patch
+    elif device == 'mlu':
         from mmcv.device.mlu import MLUDistributedDataParallel
-
-        ddp_factory["mlu"] = MLUDistributedDataParallel
+        ddp_factory['mlu'] = MLUDistributedDataParallel
         model = model.mlu()
 
     return ddp_factory[device](model, *args, **kwargs)
@@ -162,19 +158,15 @@ def convert_to_pascal_format(bbox, bbox_info, shape):
 
 
 def pascal_pixel_2_coco_pixel(boxes):
-    return [
-        np.stack(
-            (
-                box[:, 0],
-                box[:, 1],
-                box[:, 2] - box[:, 0],
-                box[:, 3] - box[:, 1],
-            ),
-            axis=1,
-        )
-        for box in boxes
-    ]
-
+    return [np.stack(
+        (
+            box[:, 0],
+            box[:, 1],
+            box[:, 2] - box[:, 0],
+            box[:, 3] - box[:, 1],
+        ),
+        axis=1,
+    ) for box in boxes]
 
 BBOX_FORMAT_TO_COCO_CONVERTER = {
     ("LTWH", "pixel"): lambda x: x,
@@ -185,13 +177,6 @@ BBOX_FORMAT_TO_COCO_CONVERTER = {
 def convert_to_coco_format(bbox, bbox_format):
     converter = BBOX_FORMAT_TO_COCO_CONVERTER[bbox_format]
     return converter(bbox)
-
-
-def first_non_empty(bboxes):
-    for box in bboxes:
-        if len(box):
-            return box
-    raise ValueError("Empty bboxes")
 
 
 class MMDetDataset(TorchDataset):
@@ -212,7 +197,7 @@ class MMDetDataset(TorchDataset):
             tensors_dict.get("masks_tensor", None), shape=self.images[0].shape
         )
         self.bboxes = self._get_bboxes(tensors_dict["boxes_tensor"])
-        bbox_format = get_bbox_format(first_non_empty(self.bboxes), bbox_info)
+        bbox_format = get_bbox_format(self.bboxes[0], bbox_info)
         self.labels = self._get_labels(tensors_dict["labels_tensor"])
         self.iscrowds = self._get_iscrowds(tensors_dict.get("iscrowds"))
         self.CLASSES = self.get_classes(tensors_dict["labels_tensor"])
@@ -502,25 +487,7 @@ def load_ds_from_cfg(cfg: Dict):
             client = DeepLakeBackendClient()
             token = client.request_auth_token(username=uname, password=pword)
     ds_path = cfg.deeplake_path
-    ds = dp.load(ds_path, token=token, read_only=True)
-    deeplake_commit = cfg.get("deeplake_commit")
-    deeplake_view_id = cfg.get("deeplake_view_id")
-    deeplake_query = cfg.get("deeplake_query")
-
-    if deeplake_view_id and deeplake_query:
-        raise Exception(
-            "A query and view_id were specified simultaneously for a dataset in the config. Please specify either the deeplake_query or the deeplake_view_id."
-        )
-
-    if deeplake_commit:
-        ds.checkout(deeplake_commit)
-
-    if deeplake_view_id:
-        ds = ds.load_view(id=deeplake_view_id)
-
-    if deeplake_query:
-        ds = ds.query(deeplake_query)
-
+    ds = dp.load(ds_path, token=token)
     return ds
 
 
@@ -556,9 +523,9 @@ def transform(
     bboxes = sample_in[boxes_tensor]
     # TODO bbox format should be recognized outside the transform, not per sample basis.
     bboxes = convert_to_pascal_format(bboxes, bbox_info, img.shape)
-    if bboxes.shape == (0, 0):  # TO DO: remove after bug will be fixed
-        bboxes = np.empty((0, 4), dtype=sample_in[boxes_tensor].dtype)
-
+    if bboxes.shape == (0,0): # TO DO: remove after bug will be fixed
+        bboxes = np.empty((0,4), dtype=sample_in[boxes_tensor].dtype)
+    
     labels = sample_in[labels_tensor]
 
     if img.ndim == 2:
@@ -580,6 +547,26 @@ def transform(
     else:
         gt_masks = None
 
+
+    import json
+
+    log = json.dumps(
+        {
+            "image.shape": img.shape,
+            "boxes.shape": np.array(bboxes).shape,
+            "labels.shape": labels.shape,
+        }
+    )
+    logs.write(log)
+    logs.write("\n")
+    import random
+    if random.randint(1, 10) == 10:
+        logs.flush()
+
+    img = np.random.randint(0, 100, (640, 390, 3), dtype=np.uint8)
+    bboxes = np.random.uniform(0, 50, (10, 4)).astype(np.float32)
+    labels = np.random.randint(0, 80, (10, ), dtype=labels.dtype)
+
     return pipeline(
         {
             "img": img,
@@ -595,6 +582,21 @@ def transform(
         }
     )
 
+
+def build_dataset(cfg):
+    if not isinstance(cfg, dp.Dataset):
+        deeplake_tensors = cfg.get("deeplake_tensors", {})
+        classes = deeplake_tensors.get("gt_labels")
+        ds = load_ds_from_cfg(cfg)
+        if classes is None:
+            classes = _find_tensor_with_htype(ds, "class_label", "gt_labels")
+        
+        if classes is None:
+            raise KeyError("No tensor with htype class_label exists in the dataset")
+        ds.CLASSES = ds[classes].info.class_names
+        return ds
+    return cfg
+    
 
 def _get_collate_keys(pipeline):
     if type(pipeline) == list:
@@ -757,54 +759,43 @@ def train_detector(
                         pipeline: dictionary where all training augmentations and transformations should be specified, like in mmdet
                         deeplake_tensors: dictionary that maps mmdet keys to deeplake dataset tensor. Example:  `{"img": "images", "gt_bboxes": "boxes", "gt_labels": "categories"}`.
                             If this dictionary is not specified, these tensors will be searched automatically using htypes like "image", "class_label, "bbox", "segment_mask" or "polygon".
-                            keys that needs to be mapped are: `img`, `gt_labels`, `gt_bboxes`, `gt_masks`. `img`, `gt_labels`, `gt_bboxes` are always required, they if not specified they
-                            are always searched, while masks are optional, if you specify in collect `gt_masks` then you need to either specify it in config or it will be searched based on
+                            keys that needs to be mapped are: `img`, `gt_labels`, `gt_bboxes`, `gt_masks`. `img`, `gt_labels`, `gt_bboxes` are always required, they if not specified they 
+                            are always searched, while masks are optional, if you specify in collect `gt_masks` then you need to either specify it in config or it will be searched based on 
                             `segment_mask` and `polygon` htypes.
                         deeplake_credentials: dictionary with deeplake credentials that allow you to acess the specified data. It has following arguments: `username`, `password`, `token`.
-                            `username` and `password` are your CLI credentials, if not specified public read and write access will be granted.
-                            `token` is the token that gives you read or write access to the datasets. It is available in your personal acccount on: https://www.activeloop.ai/.
+                            `username` and `password` are your CLI credentials, if not specified public read and write access will be granted. 
+                            `token` is the token that gives you read or write access to the datasets. It is available in your personal acccount on: https://www.activeloop.ai/. 
                             if both `username`, `password` and `token` are specified, token's read write access will be granted.
                     val (Optional): everything related to validating data, it has the following attributes:
                         pipeline: dictionary where all training augmentations and transformations should be specified, like in mmdet
                         deeplake_tensors: dictionary that maps mmdet keys to deeplake dataset tensor. Example:  {"img": "images", "gt_bboxes": "boxes", "gt_labels": "categories"}.
                             If this dictionary is not specified, these tensors will be searched automatically using htypes like "image", "class_label, "bbox", "segment_mask" or "polygon".
-                            keys that needs to be mapped are: `img`, `gt_labels`, `gt_bboxes`, `gt_masks`. `img`, `gt_labels`, `gt_bboxes` are always required, they if not specified they
-                            are always searched, while masks are optional, if you specify in collect `gt_masks` then you need to either specify it in config or it will be searched based on
+                            keys that needs to be mapped are: `img`, `gt_labels`, `gt_bboxes`, `gt_masks`. `img`, `gt_labels`, `gt_bboxes` are always required, they if not specified they 
+                            are always searched, while masks are optional, if you specify in collect `gt_masks` then you need to either specify it in config or it will be searched based on 
                             `segment_mask` and `polygon` htypes.
                         deeplake_credentials: deeplake credentials that allow you to acess the specified data. It has following arguments: `username`, `password`, `token`.
-                            `username` and `password` are your CLI credentials, if not specified public read and write access will be granted.
-                            `token` is the token that gives you read or write access to the datasets. It is available in your personal acccount on: https://www.activeloop.ai/.
+                            `username` and `password` are your CLI credentials, if not specified public read and write access will be granted. 
+                            `token` is the token that gives you read or write access to the datasets. It is available in your personal acccount on: https://www.activeloop.ai/. 
                             if both `username`, `password` and `token` are specified, token's read write access will be granted.
                     test (Optional): everything related to testing data, it has the following attributes:
                         pipeline: dictionary where all training augmentations and transformations should be specified, like in mmdet
                         deeplake_tensors: dictionary that maps mmdet keys to deeplake dataset tensor. Example:  {"img": "images", "gt_bboxes": "boxes", "gt_labels": "categories"}.
                             If this dictionary is not specified, these tensors will be searched automatically using htypes like "image", "class_label, "bbox", "segment_mask" or "polygon".
-                            keys that needs to be mapped are: `img`, `gt_labels`, `gt_bboxes`, `gt_masks`. `img`, `gt_labels`, `gt_bboxes` are always required, they if not specified they
-                            are always searched, while masks are optional, if you specify in collect `gt_masks` then you need to either specify it in config or it will be searched based on
+                            keys that needs to be mapped are: `img`, `gt_labels`, `gt_bboxes`, `gt_masks`. `img`, `gt_labels`, `gt_bboxes` are always required, they if not specified they 
+                            are always searched, while masks are optional, if you specify in collect `gt_masks` then you need to either specify it in config or it will be searched based on 
                             `segment_mask` and `polygon` htypes.
                         deeplake_credentials: deeplake credentials that allow you to acess the specified data. It has following arguments: `username`, `password`, `token`.
-                            `username` and `password` are your CLI credentials, if not specified public read and write access will be granted.
-                            `token` is the token that gives you read or write access to the datasets. It is available in your personal acccount on: https://www.activeloop.ai/.
+                            `username` and `password` are your CLI credentials, if not specified public read and write access will be granted. 
+                            `token` is the token that gives you read or write access to the datasets. It is available in your personal acccount on: https://www.activeloop.ai/. 
                             if both `username`, `password` and `token` are specified, token's read write access will be granted.
                     samples_per_gpu: number of samples to be processed per gpu
                     workers_per_gpu: number of workers per gpu
                 optimizer: dictionary containing information about optimizer initialization
                 optimizer_config: some optimizer configuration that might be used during training like grad_clip etc.
                 runner: training type e.g. EpochBasedRunner, here you can specify maximum number of epcohs to be conducted. For instance: `runner = dict(type='EpochBasedRunner', max_epochs=273)`
-        ds_train: train dataset of type dp.Dataset. This can be a view of the dataset.
-        ds_train_tensors: dictionary that maps mmdet keys to deeplake dataset tensor. Example:  {"img": "images", "gt_bboxes": "boxes", "gt_labels": "categories"}.
-            If this dictionary is not specified, these tensors will be searched automatically using htypes like "image", "class_label, "bbox", "segment_mask" or "polygon".
-            keys that needs to be mapped are: `img`, `gt_labels`, `gt_bboxes`, `gt_masks`. `img`, `gt_labels`, `gt_bboxes` are always required, they if not specified they
-            are always searched, while masks are optional, if you specify in collect `gt_masks` then you need to either specify it in config or it will be searched based on
-            `segment_mask` and `polygon` htypes.
-        ds_val: validation dataset of type dp.Dataset. This can be view of the dataset.
-        ds_val_tensors: dictionary that maps mmdet keys to deeplake dataset tensor. Example:  {"img": "images", "gt_bboxes": "boxes", "gt_labels": "categories"}.
-            If this dictionary is not specified, these tensors will be searched automatically using htypes like "image", "class_label, "bbox", "segment_mask" or "polygon".
-            keys that needs to be mapped are: `img`, `gt_labels`, `gt_bboxes`, `gt_masks`. `img`, `gt_labels`, `gt_bboxes` are always required, they if not specified they
-            are always searched, while masks are optional, if you specify in collect `gt_masks` then you need to either specify it in config or it will be searched based on
-            `segment_mask` and `polygon` htypes.
+        validation_dataset: validation dataset of type dp.Dataset
         runner: dict(type='EpochBasedRunner', max_epochs=273)
-        evaluation: dictionary that contains all information needed for evaluation apart from data processing, like how often evaluation should be done and what metrics we want to use. In deeplake
+        evaluation: dictionary that contains all information needed for evaluation apart from data processing, like how often evaluation should be done and what metrics we want to use. In deeplake 
             integration version you also need to specify what kind of output you want to be printed during evalaution. For instance, `evaluation = dict(interval=1, metric=['bbox'], metrics_format="COCO")`
         distributed: bool, whether ddp training should be started, by default `False`
         timestamp: variable used in runner to make .log and .log.json filenames the same
@@ -813,55 +804,11 @@ def train_detector(
     """
     cfg = compat_cfg(cfg)
 
-    if not hasattr(cfg, "gpu_ids"):
-        cfg.gpu_ids = range(torch.cuda.device_count() if distributed else 1)
     if distributed:
-        return torch.multiprocessing.spawn(
-            _train_detector,
-            args=(
-                model,
-                cfg,
-                ds_train,
-                ds_train_tensors,
-                ds_val,
-                ds_val_tensors,
-                distributed,
-                timestamp,
-                meta,
-                validate,
-                _get_free_port(),
-            ),
-            nprocs=len(cfg.gpu_ids),
-        )
-    _train_detector(
-        0,
-        model,
-        cfg,
-        ds_train,
-        ds_train_tensors,
-        ds_val,
-        ds_val_tensors,
-        distributed,
-        timestamp,
-        meta,
-        validate,
-    )
+        cfg.gpu_ids = range(torch.cuda.device_count())
+    elif not hasattr(cfg, "gpu_ids"):
+        cfg.gpu_ids = range(1)
 
-
-def _train_detector(
-    local_rank,
-    model,
-    cfg: mmcv.ConfigDict,
-    ds_train=None,
-    ds_train_tensors=None,
-    ds_val: Optional[dp.Dataset] = None,
-    ds_val_tensors=None,
-    distributed: bool = False,
-    timestamp=None,
-    meta=None,
-    validate: bool = True,
-    port=None,
-):
     eval_cfg = cfg.get("evaluation", {})
     dl_impl = cfg.get("deeplake_dataloader", "auto").lower()
 
@@ -881,10 +828,8 @@ def _train_detector(
     else:
         cfg_data = cfg.data.train.get("deeplake_path")
         if cfg_data:
-            always_warn(
-                "A Deep Lake dataset was specified in the cfg as well as inthe dataset input to train_detector. The dataset input to train_detector will be used in the workflow."
-            )
-
+            always_warn("A Deep Lake dataset was specified in the cfg as well as inthe dataset input to train_detector. The dataset input to train_detector will be used in the workflow.")
+    
     if ds_train_tensors:
         train_images_tensor = ds_train_tensors["img"]
         train_boxes_tensor = ds_train_tensors["gt_bboxes"]
@@ -903,9 +848,7 @@ def _train_detector(
                 ds_train, "binary_mask", "gt_masks"
             ) or _find_tensor_with_htype(ds_train, "polygon", "gt_masks")
 
-    model.CLASSES = ds_train[train_labels_tensor].info.class_names
-
-    metrics_format = cfg.get("deeplake_metrics_format", "COCO")
+    metrics_format = eval_cfg.get("metrics_format", "PascalVOC")
 
     logger = get_root_logger(log_level=cfg.log_level)
 
@@ -929,7 +872,7 @@ def _train_detector(
     }
 
     data_loader = build_dataloader(
-        ds_train,  # TO DO: convert it to for loop if we will suport concatting several datasets
+        ds_train, # TO DO: convert it to for loop if we will suport concatting several datasets
         train_images_tensor,
         train_masks_tensor,
         train_boxes_tensor,
@@ -941,6 +884,7 @@ def _train_detector(
 
     # put model on gpus
     if distributed:
+        local_rank = int(os.environ["LOCAL_RANK"])
         find_unused_parameters = cfg.get("find_unused_parameters", False)
         # Sets the `find_unused_parameters` parameter in
         # # torch.nn.parallel.DistributedDataParallel
@@ -949,12 +893,12 @@ def _train_detector(
         #                                           output_device=local_rank,
         #                                           broadcast_buffers=False,
         #                                           find_unused_parameters=find_unused_parameters)
-        force_cudnn_initialization(cfg.gpu_ids[local_rank])
-        ddp_setup(local_rank, len(cfg.gpu_ids), port)
+        torch.distributed.init_process_group(backend="nccl", rank=local_rank, world_size=len(cfg.gpu_ids))
+        force_cudnn_initialization(local_rank)
         model = build_ddp(
             model,
             cfg.device,
-            device_ids=[cfg.gpu_ids[local_rank]],
+            device_ids=[local_rank],
             broadcast_buffers=False,
             find_unused_parameters=find_unused_parameters,
         )
@@ -1022,29 +966,12 @@ def _train_detector(
         }
 
         if ds_val is None:
-            cfg_ds_val = cfg.data.get("val")
-            if cfg_ds_val is None:
-                raise Exception(
-                    "Validation dataset is not specified even though validate = True. Please set validate = False or specify a validation dataset."
-                )
-            elif cfg_ds_val.get("deeplake_path") is None:
-                raise Exception(
-                    "Validation dataset is not specified even though validate = True. Please set validate = False or specify a validation dataset."
-                )
-
             ds_val = load_ds_from_cfg(cfg.data.val)
             ds_val_tensors = cfg.data.val.get("deeplake_tensors", {})
         else:
             cfg_data = cfg.data.val.get("deeplake_path")
             if cfg_data is not None:
-                always_warn(
-                    "A Deep Lake dataset was specified in the cfg as well as inthe dataset input to train_detector. The dataset input to train_detector will be used in the workflow."
-                )
-
-        if ds_val is None:
-            raise Exception(
-                "Validation dataset is not specified even though validate = True. Please set validate = False or specify a validation dataset."
-            )
+                always_warn("A Deep Lake dataset was specified in the cfg as well as inthe dataset input to train_detector. The dataset input to train_detector will be used in the workflow.")
 
         if val_dataloader_args["samples_per_gpu"] > 1:
             # Replace 'ImageToTensor' to 'DefaultFormatBundle'
@@ -1056,12 +983,8 @@ def _train_detector(
             val_labels_tensor = ds_val_tensors["gt_labels"]
             val_masks_tensor = ds_val_tensors.get("gt_masks")
         else:
-            val_images_tensor = _find_tensor_with_htype(
-                ds_val, "image", "valiation img"
-            )
-            val_boxes_tensor = _find_tensor_with_htype(
-                ds_val, "bbox", "validation gt_bboxes"
-            )
+            val_images_tensor = _find_tensor_with_htype(ds_val, "image", "valiation img")
+            val_boxes_tensor = _find_tensor_with_htype(ds_val, "bbox", "validation gt_bboxes")
             val_labels_tensor = _find_tensor_with_htype(
                 ds_val, "class_label", "gt_labels"
             )
@@ -1098,16 +1021,3 @@ def _train_detector(
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from)
     runner.run([data_loader], cfg.workflow)
-
-
-def ddp_setup(rank: int, world_size: int, port: int):
-    """
-    Args:
-        rank: Unique identifier of each process
-        world_size: Total number of processes
-    """
-    os.environ["MASTER_ADDR"] = "localhost"
-    os.environ["MASTER_PORT"] = str(port)
-    torch.distributed.init_process_group(
-        backend="nccl", rank=rank, world_size=world_size
-    )
