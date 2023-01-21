@@ -2348,9 +2348,7 @@ class ChunkEngine:
                 flat is None or v["flatten_sequence"] == flat
             ):
                 self._all_chunk_engines[k].extend(
-                    get_link_transform(v["extend"])(
-                        samples, progressbar=progressbar, tensor_meta=self.tensor_meta
-                    )
+                    get_link_transform(v["extend"])(samples, progressbar=progressbar)
                 )
 
     def get_empty_sample(self):
