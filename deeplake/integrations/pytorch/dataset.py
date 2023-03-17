@@ -65,9 +65,13 @@ def cast_type(tensor):
 
 
 def copy_tensor(x):
+    if isinstance(x, dict):
+        return {k: copy_tensor(v) for k, v in x.items()}
     if isinstance(x, Sample):
         x = x.array
     if isinstance(x, Image.Image):
+        return x
+    if isinstance(x, str):
         return x
 
     try:
@@ -462,6 +466,7 @@ class TorchDataset(torch.utils.data.IterableDataset):
             return_index=self.return_index,
             pad_tensors=self.pad_tensors,
             decode_method=self.decode_method,
+            verbose=False
         )
 
         if self.shuffle:
