@@ -912,3 +912,55 @@ def test_pytorch_list(local_ds):
     ptds = ds.pytorch(collate_fn=list_collate_fn, batch_size=2)
     batch = next(iter(ptds))
     np.testing.assert_equal(batch, np.array([[1, 2], [3, 4]]))
+
+def test_pytorch_data_decode(local_ds, cat_path, point_cloud_paths, mesh_paths):
+    ds = local_ds
+    with ds:
+        ds.create_tensor("text", htype="text")
+        for i in range(10):
+            ds.text.append(f"hello {i}")
+        ds.create_tensor("json", htype="json")
+        for i in range(10):
+            ds.json.append({"x": i})
+        ds.create_tensor("list", htype="list")
+        for i in range(10):
+            ds.list.append([i, i + 1])
+        ds.create_tensor("class_label", htype="class_label")
+        animals = ["cat", "dog", "bird", "fish", "horse", "cow", "pig", "sheep", "goat", "chicken"]
+        ds.class_label.extend(animals)
+        ds.create_tensor("image", htype="image", sample_compression="jpeg")
+        for i in range(10):
+            ds.image.append(deeplake.read(cat_path))
+        # ds.create_tensor("point_cloud", htype="point_cloud", sample_compression=None)
+        # path = next(iter(point_cloud_paths.values()))
+        # for i in range(10):
+        #     ds.point_cloud.append(deeplake.read(path))
+        # ds.create_tensor("mesh", htype="mesh", sample_compression=None, dtype="float64")
+        # path = next(iter(mesh_paths.values()))
+        # for i in range(10):
+        #     ds.mesh.append(deeplake.read(path))
+        ds.create_tensor("generic")
+        for i in range(10):
+            ds.generic.append(i)
+
+    # val = ds.point_cloud[0].numpy()
+    # print(type(val))
+    # print(val.shape)
+    # return
+    
+    decode_method = {tensor : "data" for tensor in list(ds.tensors.keys())}
+    # decode_method["point_cloud"] = "numpy"
+    ptds = ds.pytorch(batch_size=1, num_workers=0, decode_method=decode_method)
+    for i, batch in enumerate(ptds):
+        assert batch["text"]["value"][0] == f"hello {i}"
+        # assert batch["json"]["value"]["x"][0] == i
+        # assert batch["list"]["value"][0][0] == i
+        # assert batch["list"]["value"][1][0] == i + 1
+        assert batch["class_label"]["value"] == i
+        assert batch["class_label"]["text"] == animals[i]
+        assert batch["image"]["value"].shape == (3, 900, 900)
+        # print(batch["point_cloud"].shape)
+
+
+
+
