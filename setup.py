@@ -10,10 +10,10 @@ project_name = "deeplake"
 this_directory = os.path.abspath(os.path.dirname(__file__))
 
 with open(os.path.join(this_directory, "deeplake/requirements/common.txt")) as f:
-    requirements = f.readlines()
+    requirements = list(filter(lambda x: x, f.readlines()))
 
 with open(os.path.join(this_directory, "deeplake/requirements/tests.txt")) as f:
-    tests = f.readlines()
+    tests = list(filter(lambda x: x, f.readlines()))
 
 with open(os.path.join(this_directory, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
