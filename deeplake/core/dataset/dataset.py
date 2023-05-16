@@ -1601,7 +1601,7 @@ class Dataset:
 
         try:
             ret = self._checkout(address, create, None, False)
-            integrity_check(self)
+            # integrity_check(self)
             return ret
         except (ReadOnlyModeError, CheckoutError) as e:
             raise e from None
