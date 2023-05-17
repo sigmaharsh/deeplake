@@ -5,7 +5,7 @@ import boto3
 import botocore  # type: ignore
 import posixpath
 from typing import Dict, Optional, Tuple, Type
-from datetime import datetime
+from datetime import datetime, timezone
 from botocore.session import ComponentLocator
 from deeplake.client.client import DeepLakeBackendClient
 from deeplake.core.storage.provider import StorageProvider
@@ -505,8 +505,9 @@ class S3Provider(StorageProvider):
         """If the client has an expiration time, check if creds are expired and fetch new ones.
         This would only happen for datasets stored on Deep Lake storage for which temporary 12 hour credentials are generated.
         """
+        print(f"expiration: {self.expiration}, utctime: {datetime.utcnow().timestamp()},  utctime: {datetime.now(timezone.utc).timestamp()}, force: {force},  less: {float(self.expiration) < datetime.utcnow().timestamp()}" )
         if self.expiration and (
-            force or float(self.expiration) < datetime.utcnow().timestamp()
+            force or float(self.expiration) < datetime.now(timezone.utc).timestamp()
         ):
             client = DeepLakeBackendClient(self.token)
             org_id, ds_name = self.tag.split("/")
