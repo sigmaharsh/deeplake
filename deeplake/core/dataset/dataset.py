@@ -381,6 +381,7 @@ class Dataset:
             "_parent_dataset",
             "_pad_tensors",
             "_locking_enabled",
+            "_lock_timeout",
             "enabled_tensors",
         ]
         state = {k: getattr(self, k) for k in keys}
@@ -3811,6 +3812,7 @@ class Dataset:
         public: bool = False,
         unlink: bool = False,
         create_vds_index_tensor: bool = False,
+        verbose: bool = True,
     ):
         if isinstance(dest, str):
             path = dest
@@ -3836,6 +3838,7 @@ class Dataset:
             ]
             if unlink
             else False,
+            verbose=verbose,
         )
 
         def _copy_tensor(sample_in, sample_out):
