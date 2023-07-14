@@ -380,6 +380,7 @@ def test_search_basic(local_path, hub_cloud_dev_token):
     assert len(result) == 4
 
 
+@pytest.mark.slow
 @requires_libdeeplake
 @pytest.mark.parametrize("distance_metric", ["L1", "L2", "COS", "MAX"])
 def test_search_quantitative(distance_metric, hub_cloud_dev_token):
@@ -450,6 +451,7 @@ def test_search_quantitative(distance_metric, hub_cloud_dev_token):
 
 
 @requires_libdeeplake
+@pytest.mark.slow
 def test_search_managed(hub_cloud_dev_token):
     """Test whether managed TQL and client-side TQL return the same results"""
     # initialize vector store object:
@@ -573,6 +575,7 @@ def test_delete(local_path, capsys):
     assert len(vector_store) == NUMBER_OF_DATA - 3
 
 
+@pytest.mark.slow
 def test_ingestion(local_path, capsys):
     # create data
     number_of_data = 1000
@@ -1116,6 +1119,7 @@ def test_parse_tensors_kwargs():
         utils.parse_tensors_kwargs(tensors, None, None, "embedding_1")
 
 
+@pytest.mark.slow
 def test_multiple_embeddings(local_path, capsys):
     vector_store = DeepLakeVectorStore(
         path=local_path,

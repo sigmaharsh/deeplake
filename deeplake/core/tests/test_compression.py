@@ -158,6 +158,7 @@ def test_audio(compression, audio_paths):
         assert sample.compressed_bytes(compression) == f.read()
 
 
+@pytest.mark.slow
 @pytest.mark.skipif(
     os.name == "nt" and sys.version_info < (3, 7), reason="requires python 3.7 or above"
 )

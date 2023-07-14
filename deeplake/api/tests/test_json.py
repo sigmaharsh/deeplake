@@ -222,6 +222,7 @@ def test_json_transform(ds, compression, scheduler="threaded"):
         ds.json.list()
 
 
+@pytest.mark.slow
 @enabled_non_gcs_gdrive_datasets
 def test_list_transform(ds, scheduler="threaded"):
     ds.create_tensor("list", htype="list")

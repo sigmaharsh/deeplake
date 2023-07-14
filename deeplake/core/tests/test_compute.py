@@ -7,6 +7,7 @@ schedulers = schedulers + ["ray"] if ray_installed() else schedulers
 all_schedulers = pytest.mark.parametrize("scheduler", schedulers)
 
 
+@pytest.mark.slow
 @all_schedulers
 def test_compute_with_progress_bar(scheduler):
     def f(pg_callback, x):

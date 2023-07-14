@@ -47,7 +47,15 @@ GCS = "gcs"
 AZURE = "azure"
 HUB_CLOUD = "hub_cloud"
 
-_GIT_CLONE_CACHE_DIR = ".test_resources"
+REPO_ROOT = os.path.abspath(".")
+while REPO_ROOT != os.path.dirname(REPO_ROOT):
+    if os.path.isfile(os.path.join(REPO_ROOT, "LICENSE")):
+        break
+    REPO_ROOT = os.path.dirname(REPO_ROOT)
+assert REPO_ROOT != "/"
+
+## .test_resources should always be in the root of the repo, regardless of where the tests were ran from
+_GIT_CLONE_CACHE_DIR = os.path.join(REPO_ROOT, ".test_resources")
 
 _HUB_TEST_RESOURCES_URL = "https://www.github.com/activeloopai/hub-test-resources.git"
 _PILLOW_URL = "https://www.github.com/python-pillow/Pillow.git"

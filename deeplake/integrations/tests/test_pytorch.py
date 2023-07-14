@@ -436,6 +436,7 @@ def test_pytorch_local_cache(ds):
         pytorch_small_shuffle_helper(0, 16, dls)
 
 
+@pytest.mark.slow
 @requires_torch
 def test_groups(local_ds, compressed_image_paths):
     img1 = deeplake.read(compressed_image_paths["jpeg"][0])
@@ -489,6 +490,7 @@ def test_string_tensors(local_ds):
         np.testing.assert_array_equal(batch["strings"], f"string{idx}")
 
 
+@pytest.mark.slow
 @requires_torch
 def test_pytorch_large(local_ds):
     arr_list_1 = [np.random.randn(1500, 1500, i) for i in range(5)]
@@ -514,6 +516,7 @@ def view_tform(sample):
     return sample
 
 
+@pytest.mark.slow
 @requires_torch
 @pytest.mark.parametrize(
     "index,shuffle",
@@ -561,6 +564,7 @@ def test_pytorch_view(local_ds, index, shuffle):
             pass
 
 
+@pytest.mark.slow
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
 @pytest.mark.parametrize("buffer_size", [0, 10])
@@ -587,6 +591,7 @@ def test_pytorch_collate(local_ds, shuffle, buffer_size):
         np.testing.assert_array_equal(batch[1], np.array([2, 2, 2, 2]).reshape(4, 1))
 
 
+@pytest.mark.slow
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
 def test_pytorch_transform_collate(local_ds, shuffle):
@@ -629,6 +634,7 @@ def run_ddp(rank, size, ds, q, backend="gloo"):
     q.put(s)
 
 
+@pytest.mark.slow
 @requires_torch
 @enabled_non_gdrive_datasets
 def test_pytorch_ddp(ds):

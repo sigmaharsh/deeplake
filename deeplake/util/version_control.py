@@ -36,6 +36,7 @@ from deeplake.util.keys import (
     get_commit_info_key,
 )
 from deeplake.constants import COMMIT_INFO_FILENAME
+from deeplake.util.path import relpath
 from deeplake.util.remove_cache import get_base_storage
 from deeplake.hooks import dataset_committed
 from datetime import datetime
@@ -118,7 +119,7 @@ def integrity_check(dataset):
             num_sequences = getattr(engine.sequence_encoder, "num_samples", None)
             for l, info in t.meta.links.items():
                 l = rev_tensor_names[l]
-                l = posixpath.relpath(l, dataset.group_index)
+                l = relpath(l, dataset.group_index)
                 if num_sequences is not None and not info["flatten_sequence"]:
                     n2 = num_sequences
                 else:

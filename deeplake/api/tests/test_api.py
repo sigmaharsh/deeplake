@@ -60,6 +60,7 @@ MAX_FLOAT_DTYPE = np.float_.__name__
 
 
 # not using the predefined parametrizes because `hub_cloud_ds_generator` is not enabled by default
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "ds_generator",
     [
@@ -746,6 +747,7 @@ def test_array_interface(memory_ds: Dataset):
     assert_array_equal(tensor.numpy(), np.concatenate([arr1, arr2]))
 
 
+@pytest.mark.slow
 def test_hub_dataset_suffix_bug(hub_cloud_ds, hub_cloud_dev_token):
     # creating dataset with similar name but some suffix removed from end
     ds = deeplake.dataset(hub_cloud_ds.path[:-1], token=hub_cloud_dev_token)
@@ -888,6 +890,7 @@ def test_dataset_delete():
         deeplake.constants.DELETE_SAFETY_SIZE = old_size
 
 
+@pytest.mark.slow
 def test_invalid_token():
     with pytest.raises(InvalidTokenException):
         ds = deeplake.load(
@@ -909,10 +912,27 @@ def test_invalid_token():
     ("ds_generator", "path", "hub_token"),
     [
         ("local_ds_generator", "local_path", "hub_cloud_dev_token"),
-        ("s3_ds_generator", "s3_path", "hub_cloud_dev_token"),
-        ("gcs_ds_generator", "gcs_path", "hub_cloud_dev_token"),
-        ("azure_ds_generator", "azure_path", "hub_cloud_dev_token"),
-        ("hub_cloud_ds_generator", "hub_cloud_path", "hub_cloud_dev_token"),
+        pytest.param(
+            "s3_ds_generator", "s3_path", "hub_cloud_dev_token", marks=pytest.mark.slow
+        ),
+        pytest.param(
+            "gcs_ds_generator",
+            "gcs_path",
+            "hub_cloud_dev_token",
+            marks=pytest.mark.slow,
+        ),
+        pytest.param(
+            "azure_ds_generator",
+            "azure_path",
+            "hub_cloud_dev_token",
+            marks=pytest.mark.slow,
+        ),
+        pytest.param(
+            "hub_cloud_ds_generator",
+            "hub_cloud_path",
+            "hub_cloud_dev_token",
+            marks=pytest.mark.slow,
+        ),
     ],
     indirect=True,
 )
@@ -951,7 +971,7 @@ def test_dataset_rename(ds_generator, path, hub_token, convert_to_pathlib):
     "path,hub_token",
     [
         ["local_path", "hub_cloud_dev_token"],
-        ["hub_cloud_path", "hub_cloud_dev_token"],
+        pytest.param("hub_cloud_path", "hub_cloud_dev_token", marks=pytest.mark.slow),
     ],
     indirect=True,
 )
@@ -1006,7 +1026,7 @@ def test_dataset_deepcopy(path, hub_token, num_workers, progressbar):
     "path,hub_token",
     [
         ["local_path", "hub_cloud_dev_token"],
-        ["hub_cloud_path", "hub_cloud_dev_token"],
+        pytest.param("hub_cloud_path", "hub_cloud_dev_token", marks=pytest.mark.slow),
     ],
     indirect=True,
 )
@@ -1077,7 +1097,7 @@ def test_deepcopy(path, hub_token):
     "path,hub_token",
     [
         ["local_path", "hub_cloud_dev_token"],
-        ["hub_cloud_path", "hub_cloud_dev_token"],
+        pytest.param("hub_cloud_path", "hub_cloud_dev_token", marks=pytest.mark.slow),
     ],
     indirect=True,
 )
@@ -1121,6 +1141,7 @@ def test_deepcopy_errors(path, hub_token):
         )
 
 
+@pytest.mark.slow
 def test_cloud_delete_doesnt_exist(hub_cloud_path, hub_cloud_dev_token):
     username = hub_cloud_path.split("/")[2]
     # this dataset doesn't exist
@@ -1393,6 +1414,7 @@ def test_tobytes(memory_ds, compressed_image_paths, audio_paths):
         assert ds.audio[i].tobytes() == audio_bytes
 
 
+@pytest.mark.slow
 def test_tobytes_link(memory_ds):
     with memory_ds as ds:
         ds.create_tensor("images", htype="link[image]", sample_compression="jpg")
@@ -1497,7 +1519,9 @@ def test_no_view(memory_ds):
 @pytest.mark.parametrize(
     "y_args", [{}, {"sample_compression": "lz4"}, {"chunk_compression": "lz4"}]
 )
-@pytest.mark.parametrize("x_size", [5, (32 * 1000)])
+@pytest.mark.parametrize(
+    "x_size", [5, pytest.param((32 * 1000), marks=pytest.mark.slow)]
+)
 @pytest.mark.parametrize("htype", ["generic", "sequence"])
 def test_ds_append(memory_ds, x_args, y_args, x_size, htype):
     ds = memory_ds
@@ -1565,6 +1589,7 @@ def test_ds_extend():
     assert_array_equal(ds1.y, ds2.y)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "src_args", [{}, {"sample_compression": "png"}, {"chunk_compression": "png"}]
 )
@@ -1645,6 +1670,7 @@ def test_auto_htype(memory_ds):
     assert ds.f.htype == "json"
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "args", [{}, {"sample_compression": "lz4"}, {"chunk_compression": "lz4"}]
 )
@@ -1727,6 +1753,7 @@ def test_hub_remote_read_videos(storage, memory_ds):
         assert memory_ds.videos[1].shape == (361, 720, 1280, 3)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("aslist", (True, False))
 @pytest.mark.parametrize(
     "args", [{}, {"sample_compression": "png"}, {"chunk_compression": "png"}]
@@ -1759,7 +1786,9 @@ def test_sequence_htype(memory_ds, aslist, args, idx):
     assert ds.x.shape == (10, 5, 2, 7, 3)
 
 
-@pytest.mark.parametrize("shape", [(13, 17, 3), (1007, 3001, 3)])
+@pytest.mark.parametrize(
+    "shape", [(13, 17, 3), pytest.param((1007, 3001, 3), marks=pytest.mark.slow)]
+)
 def test_sequence_htype_with_hub_read(local_ds, shape, compressed_image_paths):
     ds = local_ds
     imgs = list(map(deeplake.read, compressed_image_paths["jpeg"][:3]))
@@ -1899,9 +1928,21 @@ def test_dataset_copy(
     ("ds_generator", "path", "hub_token"),
     [
         ("local_ds_generator", "local_path", "hub_cloud_dev_token"),
-        ("s3_ds_generator", "s3_path", "hub_cloud_dev_token"),
-        ("gcs_ds_generator", "gcs_path", "hub_cloud_dev_token"),
-        ("hub_cloud_ds_generator", "hub_cloud_path", "hub_cloud_dev_token"),
+        pytest.param(
+            "s3_ds_generator", "s3_path", "hub_cloud_dev_token", marks=pytest.mark.slow
+        ),
+        pytest.param(
+            "gcs_ds_generator",
+            "gcs_path",
+            "hub_cloud_dev_token",
+            marks=pytest.mark.slow,
+        ),
+        pytest.param(
+            "hub_cloud_ds_generator",
+            "hub_cloud_path",
+            "hub_cloud_dev_token",
+            marks=pytest.mark.slow,
+        ),
     ],
     indirect=True,
 )
@@ -2128,6 +2169,7 @@ def test_text_labels_transform(local_ds_generator, scheduler, num_workers):
             assert_array_equal(a, e)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("num_workers", [0, 2])
 def test_transform_upload_fail(local_ds_generator, num_workers):
     @deeplake.compute
@@ -2292,6 +2334,7 @@ def dataset_handler_error_check(runner, username, password):
     runner.invoke(logout)
 
 
+@pytest.mark.slow
 def test_hub_related_permission_exceptions(
     hub_cloud_dev_credentials, hub_cloud_dev_token, hub_dev_token
 ):
@@ -2371,6 +2414,7 @@ def test_columnar_views(memory_ds):
     assert view.group_index == "a"
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("verify", [True, False])
 def test_bad_link(local_ds_generator, verify):
     with local_ds_generator() as ds:
@@ -2477,6 +2521,7 @@ def test_random_split_views(local_ds):
             assert len(test) == 2
 
 
+@pytest.mark.slow
 def test_invalid_ds_name():
     with pytest.raises(InvalidDatasetNameException):
         deeplake.dataset("folder/datasets/dataset name *")

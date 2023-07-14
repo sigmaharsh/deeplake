@@ -119,7 +119,7 @@ from deeplake.util.keys import (
     filter_name,
     get_dataset_linked_creds_key,
 )
-from deeplake.util.path import get_path_from_storage
+from deeplake.util.path import get_path_from_storage, relpath
 from deeplake.util.remove_cache import get_base_storage
 from deeplake.util.diff import get_all_changes_string, get_changes_and_messages
 from deeplake.util.version_control import (
@@ -408,6 +408,7 @@ class Dataset:
         state["libdeeplake_dataset"] = None
         state["_vc_info_updated"] = False
         state["_locked_out"] = False
+        state["_lock_timeout"] = 0
         self.__dict__.update(state)
         self.__dict__["base_storage"] = get_base_storage(self.storage)
         # clear cache while restoring
@@ -532,7 +533,7 @@ class Dataset:
                 ]
                 for x in enabled_tensors:
                     enabled_tensors.extend(
-                        self[posixpath.relpath(x, self.group_index)].meta.links.keys()
+                        self[relpath(x, self.group_index)].meta.links.keys()
                     )
                 ret = self.__class__(
                     storage=self.storage,
@@ -1280,7 +1281,7 @@ class Dataset:
         ):
             root._rename_tensor(
                 tensor,
-                posixpath.join(new_name, posixpath.relpath(tensor, name)),
+                posixpath.join(new_name, relpath(tensor, name)),
             )
 
         self.storage.maybe_flush()
@@ -2503,7 +2504,7 @@ class Dataset:
         tensor_names = self.version_state["tensor_names"]
         enabled_tensors = self.enabled_tensors
         return [
-            posixpath.relpath(t, self.group_index)
+            relpath(t, self.group_index)
             for t in tensor_names
             if (not self.group_index or t.startswith(self.group_index + "/"))
             and (include_hidden or tensor_names[t] not in hidden_tensors)

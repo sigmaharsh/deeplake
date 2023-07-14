@@ -132,6 +132,7 @@ def test_storage_provider(storage):
     check_storage_provider(storage)
 
 
+@pytest.mark.slow
 @enabled_cache_chains
 def test_cache(cache_chain):
     check_storage_provider(cache_chain)

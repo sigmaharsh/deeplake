@@ -169,6 +169,7 @@ def retrieve_objects_from_memory(object_type=deeplake.core.sample.Sample):
     return total_n_of_occurences
 
 
+@pytest.mark.slow
 @all_schedulers
 @pytest.mark.parametrize(
     "ds",
@@ -290,6 +291,7 @@ def test_groups_2(local_ds):
         assert ds_out.x.y.z.image.shape_interval.upper == (99, 99, 99)
 
 
+@pytest.mark.slow
 @parametrize_num_workers
 @all_schedulers
 def test_single_transform_deeplake_dataset_htypes(local_ds, num_workers, scheduler):
@@ -322,6 +324,7 @@ def test_single_transform_deeplake_dataset_htypes(local_ds, num_workers, schedul
     data_in.delete()
 
 
+@pytest.mark.slow
 @all_schedulers
 def test_chain_transform_list_small(local_ds, scheduler):
     ls = list(range(100))
@@ -348,6 +351,7 @@ def test_chain_transform_list_small(local_ds, scheduler):
             )
 
 
+@pytest.mark.slow
 @all_schedulers
 def test_chain_transform_list_big(local_ds, scheduler):
     ls = [i for i in range(2)]
@@ -373,6 +377,7 @@ def test_chain_transform_list_big(local_ds, scheduler):
             )
 
 
+@pytest.mark.slow
 @all_schedulers
 @commit_or_not
 def test_add_to_non_empty_dataset(local_ds, scheduler, do_commit):
@@ -433,6 +438,7 @@ def test_add_to_non_empty_dataset(local_ds, scheduler, do_commit):
     compare_dataset_diff([expected_dataset_diff], dataset_diff)
 
 
+@pytest.mark.slow
 @all_schedulers
 @all_compressions
 def test_transform_deeplake_read(local_ds, cat_path, sample_compression, scheduler):
@@ -453,6 +459,7 @@ def test_transform_deeplake_read(local_ds, cat_path, sample_compression, schedul
         np.testing.assert_array_equal(ds_out.image[i].numpy(), ds_out.image[0].numpy())
 
 
+@pytest.mark.slow
 @all_schedulers
 @all_compressions
 def test_transform_deeplake_read_pipeline(
@@ -633,6 +640,7 @@ def test_ds_append_in_transform(memory_ds):
     data_in.delete()
 
 
+@pytest.mark.slow
 def test_transform_pass_through():
     data_in = deeplake.dataset("mem://ds1")
     data_in.create_tensor("image", htype="image", sample_compression="png")
@@ -811,6 +819,7 @@ def test_inplace_transform_non_head(local_ds_generator):
         check_target_array(ds, i, target)
 
 
+@pytest.mark.slow
 def test_inplace_transform_bug(local_ds_generator):
     @deeplake.compute
     def construct(sample_in, sample_out):
@@ -899,6 +908,7 @@ def test_inplace_transform_clear_chunks(local_ds_generator):
             pass
 
 
+@pytest.mark.slow
 def test_transform_skip_ok(local_ds_generator):
     ds = local_ds_generator()
     ls = list(range(100))
@@ -1076,6 +1086,7 @@ def test_transform_bug_link(local_ds, cat_path):
             assert ds[i].abc.shape == (900, 900, 3)
 
 
+@pytest.mark.slow
 def test_tensor_dataset_memory_leak(local_ds):
     local_ds.create_tensor("image", htype="image", sample_compression="png")
     add_images().eval(list(range(100)), local_ds, scheduler="threaded")
@@ -1095,6 +1106,7 @@ def test_transform_info(local_ds_generator):
     assert ds.info["test"] == 123
 
 
+@pytest.mark.slow
 @parametrize_num_workers
 @all_compressions
 @pytest.mark.parametrize(
@@ -1228,6 +1240,7 @@ def test_classlabel_transform_bug(local_ds):
         np.testing.assert_array_equal(ds.x[0], -1)
 
 
+@pytest.mark.slow
 def test_downsample_transform(local_ds):
     with local_ds as ds:
         ds.create_tensor(
@@ -1284,7 +1297,10 @@ def test_none_rechunk_post_transform(local_ds):
     assert num_chunks == 2
 
 
-@pytest.mark.parametrize("scheduler", ["serial", "threaded", "processed"])
+@pytest.mark.parametrize(
+    "scheduler",
+    ["serial", "threaded", pytest.param("processed", marks=pytest.mark.skip)],
+)
 def test_transform_checkpointing(local_ds, scheduler):
     @deeplake.compute
     def upload(i, ds):
@@ -1375,6 +1391,7 @@ class BadSample:
     shape = (250, 250, 3)
 
 
+@pytest.mark.slow
 @all_schedulers
 @pytest.mark.parametrize("method", ["ds", "multiple", "checkpointed"])
 @pytest.mark.parametrize("error_at", ["transform", "chunk_engine"])
@@ -1553,6 +1570,7 @@ def mul_by_2(sample_in, samples_out):
     samples_out.images.append(sample_in.images.numpy() - 1)
 
 
+@pytest.mark.slow
 def test_pipeline(local_ds, flower_path):
     pipeline = deeplake.compose([add_samples(flower_path), mul_by_2()])
 

@@ -66,7 +66,7 @@ def index_transform(sample):
 @requires_libdeeplake
 @pytest.mark.parametrize(
     "ds",
-    ["hub_cloud_ds", "local_auth_ds"],
+    [pytest.param("hub_cloud_ds", marks=pytest.mark.slow), "local_auth_ds"],
     indirect=True,
 )
 def test_pytorch_small(ds):
@@ -125,6 +125,7 @@ def test_pytorch_small(ds):
             )
 
 
+@pytest.mark.slow
 @requires_torch
 @requires_libdeeplake
 def test_pytorch_transform(hub_cloud_ds):
@@ -153,6 +154,7 @@ def test_pytorch_transform(hub_cloud_ds):
             np.testing.assert_array_equal(actual_image2, expected_image2)
 
 
+@pytest.mark.slow
 @requires_torch
 @requires_libdeeplake
 def test_pytorch_transform_dict(hub_cloud_ds):
@@ -193,6 +195,7 @@ def test_pytorch_transform_dict(hub_cloud_ds):
 
 
 @requires_torch
+@pytest.mark.slow
 @requires_libdeeplake
 def test_pytorch_with_compression(hub_cloud_ds: Dataset):
     # TODO: chunk-wise compression for labels (right now they are uncompressed)
@@ -222,6 +225,7 @@ def test_pytorch_with_compression(hub_cloud_ds: Dataset):
             assert T.shape == (1, 1)
 
 
+@pytest.mark.slow
 @requires_torch
 @requires_libdeeplake
 def test_custom_tensor_order(hub_cloud_ds):
@@ -261,6 +265,7 @@ def test_custom_tensor_order(hub_cloud_ds):
         np.testing.assert_array_equal(d1[0], hub_cloud_ds.d.numpy()[i])
 
 
+@pytest.mark.slow
 @requires_torch
 @requires_libdeeplake
 def test_readonly_with_two_workers(hub_cloud_ds):
@@ -302,6 +307,7 @@ def test_pytorch_local_cache():
 
 @requires_torch
 @requires_libdeeplake
+@pytest.mark.slow
 def test_groups(hub_cloud_ds, compressed_image_paths):
     img1 = deeplake.read(compressed_image_paths["jpeg"][0])
     img2 = deeplake.read(compressed_image_paths["png"][0])
@@ -330,6 +336,7 @@ def test_groups(hub_cloud_ds, compressed_image_paths):
         np.testing.assert_array_equal(flower[0], img2.array)
 
 
+@pytest.mark.slow
 @requires_torch
 @requires_libdeeplake
 def test_string_tensors(hub_cloud_ds):
@@ -363,6 +370,7 @@ def test_pytorch_large():
         [4, 3, 2, 1],
     ],
 )
+@pytest.mark.slow
 def test_pytorch_view(hub_cloud_ds, index):
     arr_list_1 = [np.random.randn(15, 15, i) for i in range(10)]
     arr_list_2 = [np.random.randn(40, 15, 4, i) for i in range(10)]
@@ -388,6 +396,7 @@ def test_pytorch_view(hub_cloud_ds, index):
 @requires_torch
 @requires_libdeeplake
 @pytest.mark.parametrize("shuffle", [True, False])
+@pytest.mark.slow
 def test_pytorch_collate(hub_cloud_ds, shuffle):
     with hub_cloud_ds:
         hub_cloud_ds.create_tensor("a")
@@ -412,6 +421,7 @@ def test_pytorch_collate(hub_cloud_ds, shuffle):
 @requires_torch
 @requires_libdeeplake
 @pytest.mark.parametrize("shuffle", [True, False])
+@pytest.mark.slow
 def test_pytorch_transform_collate(hub_cloud_ds, shuffle):
     with hub_cloud_ds:
         hub_cloud_ds.create_tensor("a")
@@ -449,6 +459,7 @@ def test_pytorch_ddp():
 @requires_torch
 @requires_libdeeplake
 @pytest.mark.parametrize("compression", [None, "jpeg"])
+@pytest.mark.slow
 def test_pytorch_decode(hub_cloud_ds, compressed_image_paths, compression):
     with hub_cloud_ds:
         hub_cloud_ds.create_tensor("image", sample_compression=compression)
@@ -487,6 +498,7 @@ def test_pytorch_decode(hub_cloud_ds, compressed_image_paths, compression):
                     np.testing.assert_array_equal(np.array(f), np.array(image))
 
 
+@pytest.mark.slow
 @requires_torch
 @requires_libdeeplake
 def test_rename(hub_cloud_ds):
@@ -509,6 +521,7 @@ def test_rename(hub_cloud_ds):
 @requires_torch
 @requires_libdeeplake
 @pytest.mark.parametrize("num_workers", [0, 2])
+@pytest.mark.slow
 def test_indexes(hub_cloud_ds, num_workers):
     shuffle = False
     with hub_cloud_ds as ds:
@@ -532,6 +545,7 @@ def test_indexes(hub_cloud_ds, num_workers):
 
 @requires_torch
 @requires_libdeeplake
+@pytest.mark.slow
 @pytest.mark.parametrize("num_workers", [0, 2])
 def test_indexes_transform(hub_cloud_ds, num_workers):
     shuffle = False
@@ -560,6 +574,7 @@ def test_indexes_transform(hub_cloud_ds, num_workers):
 @requires_torch
 @requires_libdeeplake
 @pytest.mark.parametrize("num_workers", [0, 2])
+@pytest.mark.slow
 def test_indexes_transform_dict(hub_cloud_ds, num_workers):
     shuffle = False
     with hub_cloud_ds as ds:
@@ -597,6 +612,7 @@ def test_indexes_transform_dict(hub_cloud_ds, num_workers):
 @requires_torch
 @requires_libdeeplake
 @pytest.mark.parametrize("num_workers", [0, 2])
+@pytest.mark.slow
 def test_indexes_tensors(hub_cloud_ds, num_workers):
     shuffle = False
     with hub_cloud_ds as ds:
@@ -627,6 +643,7 @@ def test_indexes_tensors(hub_cloud_ds, num_workers):
 
 @requires_libdeeplake
 @requires_torch
+@pytest.mark.slow
 def test_uneven_iteration(hub_cloud_ds):
     with hub_cloud_ds as ds:
         ds.create_tensor("x")
@@ -641,6 +658,7 @@ def test_uneven_iteration(hub_cloud_ds):
 
 
 @requires_libdeeplake
+@pytest.mark.slow
 @requires_torch
 def test_pytorch_error_handling(hub_cloud_ds):
     with hub_cloud_ds as ds:
@@ -665,6 +683,7 @@ def test_pytorch_error_handling(hub_cloud_ds):
 
 @requires_libdeeplake
 @requires_torch
+@pytest.mark.slow
 def test_pil_decode_method(hub_cloud_ds):
     with hub_cloud_ds as ds:
         ds.create_tensor("x", htype="image", sample_compression="jpeg")
@@ -732,6 +751,7 @@ def test_pytorch_dummy_data(local_auth_ds):
 
 @requires_libdeeplake
 @requires_torch
+@pytest.mark.slow
 def test_json_data_loader(hub_cloud_ds):
     ds = hub_cloud_ds
     with ds:
@@ -756,6 +776,7 @@ def test_json_data_loader(hub_cloud_ds):
 
 @requires_libdeeplake
 @requires_torch
+@pytest.mark.slow
 def test_list_data_loader(hub_cloud_ds):
     ds = hub_cloud_ds
     with ds:
@@ -779,6 +800,7 @@ def test_list_data_loader(hub_cloud_ds):
 
 @requires_libdeeplake
 @requires_torch
+@pytest.mark.slow
 def test_pytorch_data_decode(hub_cloud_ds, cat_path):
     with hub_cloud_ds as ds:
         ds.create_tensor("generic")

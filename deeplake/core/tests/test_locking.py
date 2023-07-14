@@ -39,6 +39,7 @@ class VM(object):
 
 @requires_non_python11
 @enabled_persistent_non_gdrive_dataset_generators
+@pytest.mark.slow
 def test_dataset_locking(ds_generator):
     deeplake.constants.LOCK_LOCAL_DATASETS = True
     try:
@@ -69,6 +70,7 @@ def test_dataset_locking(ds_generator):
 
 @requires_non_python11
 @enabled_persistent_non_gdrive_dataset_generators
+@pytest.mark.slow
 def test_vc_locking(ds_generator):
     deeplake.constants.LOCK_LOCAL_DATASETS = True
     try:

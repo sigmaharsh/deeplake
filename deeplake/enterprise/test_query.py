@@ -1,8 +1,10 @@
+import pytest
 from math import floor
 from deeplake.tests.common import requires_libdeeplake
 import numpy as np
 
 
+@pytest.mark.slow
 @requires_libdeeplake
 def test_query(hub_cloud_ds):
     with hub_cloud_ds as ds:

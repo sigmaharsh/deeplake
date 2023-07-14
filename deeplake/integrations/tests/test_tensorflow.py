@@ -5,6 +5,7 @@ import deeplake
 import pytest
 
 
+@pytest.mark.slow
 @requires_tensorflow
 def test_tensorflow_with_compression(local_ds: Dataset):
     # TODO: when chunk-wise compression is done, `labels` should be compressed using lz4, so this test needs to be updated

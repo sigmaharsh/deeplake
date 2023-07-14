@@ -55,6 +55,7 @@ def test_agreement_logged_out(hub_cloud_dev_credentials):
         agree(path)
 
 
+@pytest.mark.slow
 def test_agreement_logged_in(hub_cloud_dev_credentials):
     runner = CliRunner()
     username, password = hub_cloud_dev_credentials
@@ -65,6 +66,7 @@ def test_agreement_logged_in(hub_cloud_dev_credentials):
     runner.invoke(logout)
 
 
+@pytest.mark.slow
 def test_not_agreement_logged_in(hub_cloud_dev_credentials):
     runner = CliRunner()
     username, password = hub_cloud_dev_credentials

@@ -6,6 +6,7 @@ from deeplake.core.compute.provider import ComputeProvider, get_progress_bar
 from deeplake.core.storage.memory import MemoryProvider
 from deeplake.util.bugout_reporter import deeplake_reporter
 from deeplake.util.compute import get_compute_provider
+from deeplake.util.path import relpath
 from deeplake.util.remove_cache import get_base_storage
 from deeplake.util.transform import (
     check_lengths,
@@ -373,7 +374,9 @@ class Pipeline:
         if not read_only:
             for tensor in class_label_tensors:
                 actual_tensor = target_ds[tensor]
-                temp_tensor = f"__temp{posixpath.relpath(tensor, target_ds.group_index)}_{uuid4().hex[:4]}"
+                temp_tensor = (
+                    f"__temp{relpath(tensor, target_ds.group_index)}_{uuid4().hex[:4]}"
+                )
                 with target_ds:
                     temp_tensor_obj = target_ds.create_tensor(
                         temp_tensor,

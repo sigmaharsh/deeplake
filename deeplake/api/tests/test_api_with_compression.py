@@ -33,6 +33,7 @@ def _populate_compressed_samples(tensor: Tensor, cat_path, flower_path, count=1)
         )
 
 
+@pytest.mark.slow
 def test_populate_compressed_samples(local_ds, cat_path, flower_path):
     images = local_ds.create_tensor(
         TENSOR_KEY,
@@ -68,6 +69,7 @@ def test_populate_compressed_samples(local_ds, cat_path, flower_path):
     assert images.shape_interval.upper == (6, 900, 900, 4)
 
 
+@pytest.mark.slow
 def test_iterate_compressed_samples(local_ds, cat_path, flower_path):
     images = local_ds.create_tensor(TENSOR_KEY, htype="image", sample_compression="png")
 
@@ -175,6 +177,7 @@ def test_sample_chunk_compression_mutually_exclusive(memory_ds: Dataset):
     )
 
 
+@pytest.mark.slow
 def test_chunkwise_compression(memory_ds, cat_path, flower_path):
     ds = memory_ds
     im_ct = 5
