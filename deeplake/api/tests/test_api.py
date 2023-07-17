@@ -1726,7 +1726,7 @@ def test_hub_remote_read_images(storage, memory_ds, color_image_paths, gdrive_cr
 
 def test_hub_remote_read_gdrive_root(request, memory_ds, gdrive_creds):
     if not is_opt_true(request, GDRIVE_OPT):
-        pytest.skip()
+        pytest.skip(f"{GDRIVE_OPT} flag not set")
     memory_ds.create_tensor("images", htype="image", sample_compression="jpg")
     memory_ds.images.append(deeplake.read("gdrive://cat.jpeg", creds=gdrive_creds))
     assert memory_ds.images[0].shape == (900, 900, 3)

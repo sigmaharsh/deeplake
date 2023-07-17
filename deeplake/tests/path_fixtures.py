@@ -261,7 +261,7 @@ def _get_storage_path(
 @pytest.fixture
 def memory_path(request):
     if is_opt_true(request, MEMORY_OPT):
-        pytest.skip()
+        pytest.skip(f"{MEMORY_OPT} flag not set")
         return
 
     # no need to clear memory paths
@@ -271,7 +271,7 @@ def memory_path(request):
 @pytest.fixture
 def local_path(request):
     if not is_opt_true(request, LOCAL_OPT):
-        pytest.skip()
+        pytest.skip(f"{LOCAL_OPT} flag not set")
         return
 
     path = _get_storage_path(request, LOCAL)
@@ -287,7 +287,7 @@ def local_path(request):
 @pytest.fixture
 def s3_path(request):
     if not is_opt_true(request, S3_OPT):
-        pytest.skip()
+        pytest.skip(f"{S3_OPT} flag not set")
         return
 
     path = _get_storage_path(request, S3)
@@ -303,7 +303,7 @@ def s3_path(request):
 @pytest.fixture
 def s3_vstream_path(request):
     if not is_opt_true(request, S3_OPT):
-        pytest.skip()
+        pytest.skip(f"{S3_OPT} flag not set")
         return
 
     path = f"{PYTEST_S3_PROVIDER_BASE_ROOT}vstream_test"
@@ -318,7 +318,7 @@ def gcs_creds():
 @pytest.fixture
 def gcs_path(request, gcs_creds):
     if not is_opt_true(request, GCS_OPT):
-        pytest.skip()
+        pytest.skip(f"{GCS_OPT} flag not set")
         return
 
     path = _get_storage_path(request, GCS)
@@ -334,7 +334,7 @@ def gcs_path(request, gcs_creds):
 @pytest.fixture
 def gcs_vstream_path(request):
     if not is_opt_true(request, GCS_OPT):
-        pytest.skip()
+        pytest.skip(f"{GCS_OPT} flag not set")
         return
 
     path = f"{PYTEST_GCS_PROVIDER_BASE_ROOT}vstream_test"
@@ -344,7 +344,7 @@ def gcs_vstream_path(request):
 @pytest.fixture
 def azure_path(request):
     if not is_opt_true(request, AZURE_OPT):
-        pytest.skip()
+        pytest.skip(f"{AZURE_OPT} flag not set")
 
     path = _get_storage_path(request, AZURE)
     AzureProvider(path).clear()
@@ -359,7 +359,7 @@ def azure_path(request):
 @pytest.fixture
 def azure_vstream_path(request):
     if not is_opt_true(request, AZURE_OPT):
-        pytest.skip()
+        pytest.skip(f"{AZURE_OPT} flag not set")
 
     path = f"{PYTEST_AZURE_PROVIDER_BASE_ROOT}vstream_test"
     yield path
@@ -381,7 +381,7 @@ def gdrive_creds():
 @pytest.fixture
 def gdrive_path(request, gdrive_creds):
     if not is_opt_true(request, GDRIVE_OPT):
-        pytest.skip()
+        pytest.skip(f"{GDRIVE_OPT} flag not set")
         return
 
     path = _get_storage_path(request, GDRIVE, with_current_test_name=False)
@@ -396,7 +396,7 @@ def gdrive_path(request, gdrive_creds):
 @pytest.fixture
 def hub_cloud_path(request, hub_cloud_dev_token):
     if not is_opt_true(request, HUB_CLOUD_OPT):
-        pytest.skip()
+        pytest.skip(f"{HUB_CLOUD_OPT} flag not set")
         return
 
     path = _get_storage_path(request, HUB_CLOUD)
@@ -418,7 +418,7 @@ def hub_cloud_path(request, hub_cloud_dev_token):
 @pytest.fixture
 def hub_cloud_vstream_path(request, hub_cloud_dev_token):
     if not is_opt_true(request, HUB_CLOUD_OPT):
-        pytest.skip()
+        pytest.skip(f"{HUB_CLOUD_OPT} flag not set")
         return
 
     path = f"{PYTEST_HUB_CLOUD_PROVIDER_BASE_ROOT}vstream_test_dataset"
@@ -533,7 +533,7 @@ def corrupt_image_paths():
 @pytest.fixture
 def audio_paths():
     if sys.platform.startswith("linux") and sys.version_info[:2] == (3, 6):  # FixMe
-        pytest.skip()
+        pytest.skip("Skipping audio tests on linux 3.6")
         return
     paths = {"mp3": "samplemp3.mp3", "flac": "sampleflac.flac", "wav": "samplewav.wav"}
 
