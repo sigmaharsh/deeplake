@@ -38,7 +38,7 @@ jobs:
 
   test:
     name: Test
-    uses: activeloopai/shared-github-actions/.github/workflows/full_test.yml@identify_slow_test
+    uses: activeloopai/shared-github-actions/.github/workflows/full_test.yml@identify_slow_tests
     if: github.repository == 'activeloopai/deeplake' && ! ( github.ref_name == 'main' || startsWith( github.ref_name, 'release/' ))
     with:
       repo: ${{ github.repository }}
