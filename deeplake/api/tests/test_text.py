@@ -27,7 +27,11 @@ def test_text_transform(ds, scheduler="threaded"):
         return ds
 
     upload().eval(
-        ["hi", "if ur reading this ur a nerd"], ds, num_workers=2, scheduler=scheduler, progressbar=False,
+        ["hi", "if ur reading this ur a nerd"],
+        ds,
+        num_workers=2,
+        scheduler=scheduler,
+        progressbar=False,
     )
 
     assert len(ds) == 2

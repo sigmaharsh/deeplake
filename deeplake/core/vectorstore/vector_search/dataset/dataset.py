@@ -458,7 +458,9 @@ def convert_id_to_row_id(ids, dataset, search_fn, query, exec_option, filter):
         if "ids" in tensors:
             id_tensor = "ids"
 
-        delete_view = dataset.filter(lambda x: x[id_tensor].data()["value"] in ids, progressbar=False)
+        delete_view = dataset.filter(
+            lambda x: x[id_tensor].data()["value"] in ids, progressbar=False
+        )
 
     row_ids = list(delete_view.sample_indices)
     return row_ids

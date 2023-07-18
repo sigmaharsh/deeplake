@@ -164,9 +164,13 @@ def test_dataset_view_save(optimize):
         _populate_data(ds)
     view = ds.filter("labels == 'dog'", progressbar=False)
     with pytest.raises(DatasetViewSavingError):
-        view.save_view(path=".tests/ds_view", overwrite=True, optimize=optimize, verbose=False)
+        view.save_view(
+            path=".tests/ds_view", overwrite=True, optimize=optimize, verbose=False
+        )
     ds.commit()
-    view.save_view(path=".tests/ds_view", overwrite=True, optimize=optimize, verbose=False)
+    view.save_view(
+        path=".tests/ds_view", overwrite=True, optimize=optimize, verbose=False
+    )
     view2 = deeplake.dataset(".tests/ds_view")
     for t in view.tensors:
         np.testing.assert_array_equal(view[t].numpy(), view2[t].numpy())
@@ -175,10 +179,14 @@ def test_dataset_view_save(optimize):
     view = ds.filter("labels == 'dog'", progressbar=False)
     _populate_data(ds)
     with pytest.raises(InvalidViewException):
-        view.save_view(path=".tests/ds_view", overwrite=True, optimize=optimize, verbose=False)
+        view.save_view(
+            path=".tests/ds_view", overwrite=True, optimize=optimize, verbose=False
+        )
     ds.commit()
     view = ds.filter("labels == 'dog'", progressbar=False)
-    view.save_view(path=".tests/ds_view", overwrite=True, optimize=optimize, verbose=False)
+    view.save_view(
+        path=".tests/ds_view", overwrite=True, optimize=optimize, verbose=False
+    )
 
 
 @pytest.mark.parametrize(
@@ -340,7 +348,9 @@ def test_query_sample_info(local_ds, compressed_image_paths):
             ds.image.append(img)
             path_to_shape[path] = img.shape
     for path in compressed_image_paths["jpeg"]:
-        view = ds.filter(f"r'{path}' in image.sample_info['filename']", progressbar=False)
+        view = ds.filter(
+            f"r'{path}' in image.sample_info['filename']", progressbar=False
+        )
         np.testing.assert_array_equal(
             view[0].image.numpy().reshape(-1), np.array(deeplake.read(path)).reshape(-1)
         )  # reshape to ignore grayscale normalization
@@ -366,7 +376,9 @@ def test_query_bug_transformed_dataset(local_ds):
         list_classes = list(np.random.randint(3, size=30, dtype=np.uint32))
         create_dataset().eval(list_classes, ds, num_workers=2)
 
-    ds_view = local_ds.filter("classes == 'class_0'", scheduler="threaded", progressbar=False)
+    ds_view = local_ds.filter(
+        "classes == 'class_0'", scheduler="threaded", progressbar=False
+    )
     np.testing.assert_array_equal(ds_view.classes.numpy()[:, 0], [0] * len(ds_view))
 
 

@@ -23,7 +23,8 @@ def dp_filter_python(x: dict, filter: Dict) -> bool:
 
 
 def attribute_based_filtering_python(
-    view, filter: Optional[Union[Dict, Callable]] = None,
+    view,
+    filter: Optional[Union[Dict, Callable]] = None,
     progressbar: Optional[bool] = True,
 ):
     if len(view) == 0:

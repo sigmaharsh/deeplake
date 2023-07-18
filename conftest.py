@@ -36,6 +36,8 @@ def pytest_configure(config):
         "markers",
         "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     )
+
+
 def pytest_addoption(parser):
     parser.addoption(
         MEMORY_OPT, action="store_true", help="Memory tests will be SKIPPED if enabled."
