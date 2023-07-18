@@ -335,7 +335,7 @@ def test_query_shape(local_ds):
         for shape, count in zip(shapes, counts):
             ds.image.extend(np.random.randint(50, 100, (count, *shape), dtype=np.uint8))
     for shape, count in zip(shapes, counts):
-        assert len(ds.filter(f"image.shape == {shape}"), progressbar=False) == count
+        assert len(ds.filter(f"image.shape == {shape}", progressbar=False)) == count
 
 
 def test_query_sample_info(local_ds, compressed_image_paths):
