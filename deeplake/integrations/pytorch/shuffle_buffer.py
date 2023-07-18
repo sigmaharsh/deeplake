@@ -1,4 +1,4 @@
-from typing import List, Any, Sequence
+from typing import List, Any, Sequence, Optional
 from random import randrange
 from functools import reduce
 from operator import mul
@@ -27,7 +27,7 @@ class ShuffleBuffer:
         ValueError if buffer size is not set
     """
 
-    def __init__(self, size: int) -> None:
+    def __init__(self, size: int, progressbar: Optional[bool] = True) -> None:
         if size <= 0:
             raise ValueError("Buffer size should be positive value more than zero")
 
@@ -41,6 +41,7 @@ class ShuffleBuffer:
             unit="B",
             unit_scale=True,
             unit_divisor=1024,
+            disable=not progressbar,
         )
         self.pbar_closed = False
 

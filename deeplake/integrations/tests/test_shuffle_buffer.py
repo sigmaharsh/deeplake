@@ -10,11 +10,11 @@ import torch
 
 def test_zero_buffer_size():
     with pytest.raises(ValueError):
-        ShuffleBuffer(0)
+        ShuffleBuffer(0, progressbar=False)
 
 
 def test_too_small_buffer():
-    buffer = ShuffleBuffer(10)
+    buffer = ShuffleBuffer(10, progressbar=False)
 
     tensor = {"val": torch.ones(10)}
 
@@ -25,7 +25,7 @@ def test_too_small_buffer():
 
 
 def test_adding_tensor():
-    buffer = ShuffleBuffer(40)
+    buffer = ShuffleBuffer(40, progressbar=False)
     tensor = {"val": torch.ones(10)}
 
     result = buffer.exchange(tensor)
@@ -34,7 +34,7 @@ def test_adding_tensor():
 
 
 def test_constant_tensor():
-    buffer = ShuffleBuffer(8)
+    buffer = ShuffleBuffer(8, progressbar=False)
     tensor = {"val": torch.tensor(1)}
 
     result = buffer.exchange(tensor)

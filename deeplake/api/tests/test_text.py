@@ -27,7 +27,7 @@ def test_text_transform(ds, scheduler="threaded"):
         return ds
 
     upload().eval(
-        ["hi", "if ur reading this ur a nerd"], ds, num_workers=2, scheduler=scheduler
+        ["hi", "if ur reading this ur a nerd"], ds, num_workers=2, scheduler=scheduler, progressbar=False,
     )
 
     assert len(ds) == 2
@@ -75,7 +75,7 @@ def test_text_rechunk(memory_ds, args):
         ds.create_tensor("x", htype="text", max_chunk_size=16, **args)
         ds.x.extend(["abcd"] * 100)
         assert len(ds.x.chunk_engine.chunk_id_encoder.array) > 2
-        ds.rechunk()
+        ds.rechunk(progressbar=False)
     assert ds.x.numpy().reshape(-1).tolist() == ["abcd"] * 100
 
 

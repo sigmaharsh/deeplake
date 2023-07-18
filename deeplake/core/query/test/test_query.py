@@ -121,8 +121,8 @@ def test_query_scheduler(local_ds):
     f1 = "labels % 2 == 0"
     f2 = lambda s: s.labels.numpy() % 2 == 0
 
-    view1 = ds.filter(f1, num_workers=2, progressbar=True)
-    view2 = ds.filter(f2, num_workers=2, progressbar=True)
+    view1 = ds.filter(f1, num_workers=2, progressbar=False)
+    view2 = ds.filter(f2, num_workers=2, progressbar=False)
 
     np.testing.assert_array_equal(view1.labels.numpy(), view2.labels.numpy())
 
@@ -162,23 +162,23 @@ def test_sub_sample_view_save(optimize, idx_subscriptable, compressed_image_path
 def test_dataset_view_save(optimize):
     with deeplake.dataset(".tests/ds", overwrite=True) as ds:
         _populate_data(ds)
-    view = ds.filter("labels == 'dog'")
+    view = ds.filter("labels == 'dog'", progressbar=False)
     with pytest.raises(DatasetViewSavingError):
-        view.save_view(path=".tests/ds_view", overwrite=True, optimize=optimize)
+        view.save_view(path=".tests/ds_view", overwrite=True, optimize=optimize, verbose=False)
     ds.commit()
-    view.save_view(path=".tests/ds_view", overwrite=True, optimize=optimize)
+    view.save_view(path=".tests/ds_view", overwrite=True, optimize=optimize, verbose=False)
     view2 = deeplake.dataset(".tests/ds_view")
     for t in view.tensors:
         np.testing.assert_array_equal(view[t].numpy(), view2[t].numpy())
     _populate_data(ds)
     ds.commit()
-    view = ds.filter("labels == 'dog'")
+    view = ds.filter("labels == 'dog'", progressbar=False)
     _populate_data(ds)
     with pytest.raises(InvalidViewException):
-        view.save_view(path=".tests/ds_view", overwrite=True, optimize=optimize)
+        view.save_view(path=".tests/ds_view", overwrite=True, optimize=optimize, verbose=False)
     ds.commit()
-    view = ds.filter("labels == 'dog'")
-    view.save_view(path=".tests/ds_view", overwrite=True, optimize=optimize)
+    view = ds.filter("labels == 'dog'", progressbar=False)
+    view.save_view(path=".tests/ds_view", overwrite=True, optimize=optimize, verbose=False)
 
 
 @pytest.mark.parametrize(
@@ -307,10 +307,10 @@ def test_multi_category_labels(local_ds):
         ds.label.append([1, 2])
         ds.image.append(r * 2)
         ds.label.append([0, 2])
-    view1 = ds.filter("label == 0")
-    view2 = ds.filter("label == 'cat'")
-    view3 = ds.filter("'cat' in label")
-    view4 = ds.filter("label.contains('cat')")
+    view1 = ds.filter("label == 0", progressbar=False)
+    view2 = ds.filter("label == 'cat'", progressbar=False)
+    view3 = ds.filter("'cat' in label", progressbar=False)
+    view4 = ds.filter("label.contains('cat')", progressbar=False)
     exp_images = np.array([r, r * 2])
     exp_labels = np.array([[0, 1], [0, 2]], dtype=np.uint8)
     for v in (view1, view2, view3, view4):
@@ -327,7 +327,7 @@ def test_query_shape(local_ds):
         for shape, count in zip(shapes, counts):
             ds.image.extend(np.random.randint(50, 100, (count, *shape), dtype=np.uint8))
     for shape, count in zip(shapes, counts):
-        assert len(ds.filter(f"image.shape == {shape}")) == count
+        assert len(ds.filter(f"image.shape == {shape}"), progressbar=False) == count
 
 
 def test_query_sample_info(local_ds, compressed_image_paths):
@@ -340,7 +340,7 @@ def test_query_sample_info(local_ds, compressed_image_paths):
             ds.image.append(img)
             path_to_shape[path] = img.shape
     for path in compressed_image_paths["jpeg"]:
-        view = ds.filter(f"r'{path}' in image.sample_info['filename']")
+        view = ds.filter(f"r'{path}' in image.sample_info['filename']", progressbar=False)
         np.testing.assert_array_equal(
             view[0].image.numpy().reshape(-1), np.array(deeplake.read(path)).reshape(-1)
         )  # reshape to ignore grayscale normalization
@@ -366,7 +366,7 @@ def test_query_bug_transformed_dataset(local_ds):
         list_classes = list(np.random.randint(3, size=30, dtype=np.uint32))
         create_dataset().eval(list_classes, ds, num_workers=2)
 
-    ds_view = local_ds.filter("classes == 'class_0'", scheduler="threaded")
+    ds_view = local_ds.filter("classes == 'class_0'", scheduler="threaded", progressbar=False)
     np.testing.assert_array_equal(ds_view.classes.numpy()[:, 0], [0] * len(ds_view))
 
 
@@ -384,8 +384,8 @@ def test_query_view_union(local_ds):
     with ds:
         ds.create_tensor("x")
         ds.x.extend(list(range(10)))
-    v1 = ds.filter(lambda s: s.x.numpy() % 2)
-    v2 = ds.filter(lambda s: not (s.x.numpy() % 2))
+    v1 = ds.filter(lambda s: s.x.numpy() % 2, progressbar=False)
+    v2 = ds.filter(lambda s: not (s.x.numpy() % 2), progressbar=False)
     union = ds[sorted(list(set(v1.sample_indices).union(v2.sample_indices)))]
     np.testing.assert_array_equal(union.x.numpy(), ds.x.numpy())
 

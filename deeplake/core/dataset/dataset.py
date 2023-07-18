@@ -3242,6 +3242,7 @@ class Dataset:
                         scheduler=scheduler,
                         unlink=unlink,
                         create_vds_index_tensor=True,
+                        progressbar=self.verbose,
                     )
                 else:
                     vds.create_tensor(
@@ -3250,6 +3251,7 @@ class Dataset:
                         create_shape_tensor=False,
                         create_id_tensor=False,
                         create_sample_info_tensor=False,
+                        verbose=self.verbose,
                     ).extend(list(self.index.values[0].indices(self.num_samples)))
                     info["first-index-subscriptable"] = self.index.subscriptable_at(0)
                     if len(self.index) > 1:
