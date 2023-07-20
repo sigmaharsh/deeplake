@@ -655,29 +655,30 @@ def test_delete(local_path, capsys):
     vector_store.delete(ids=ids[:3])
     assert len(vector_store) == NUMBER_OF_DATA - 3
 
+
 def assert_updated_vector_store(
-        new_embedding_value,
-        vector_store,
-        ids,
-        row_ids,
-        filters,
-        query,
-        embedding_function,
-        embedding_source_tensor,
-        embedding_tensor,
-        exec_option,
-        num_changed_samples=3,
+    new_embedding_value,
+    vector_store,
+    ids,
+    row_ids,
+    filters,
+    query,
+    embedding_function,
+    embedding_source_tensor,
+    embedding_tensor,
+    exec_option,
+    num_changed_samples=3,
 ):
     if isinstance(embedding_tensor, str):
         new_embeddings = [
-                             np.ones(EMBEDDING_DIM) * new_embedding_value
-                         ] * num_changed_samples
+            np.ones(EMBEDDING_DIM) * new_embedding_value
+        ] * num_changed_samples
     else:
         new_embeddings = []
         for i in range(len(embedding_tensor)):
             new_embedding = [
-                                np.ones(EMBEDDING_DIM) * new_embedding_value[i]
-                            ] * num_changed_samples
+                np.ones(EMBEDDING_DIM) * new_embedding_value[i]
+            ] * num_changed_samples
             new_embeddings.append(new_embedding)
 
     if not row_ids:
@@ -728,12 +729,12 @@ def assert_updated_vector_store(
 )
 @pytest.mark.parametrize("init_embedding_function", [embedding_fn3, None])
 def test_update_embedding(
-        ds_generator,
-        vector_store_hash_ids,
-        vector_store_row_ids,
-        vector_store_filters,
-        vector_store_query,
-        init_embedding_function,
+    ds_generator,
+    vector_store_hash_ids,
+    vector_store_row_ids,
+    vector_store_filters,
+    vector_store_query,
+    init_embedding_function,
 ):
     if vector_store_filters == "filter_udf":
         vector_store_filters = filter_udf
