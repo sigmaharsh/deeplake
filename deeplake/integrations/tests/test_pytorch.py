@@ -436,7 +436,6 @@ def test_pytorch_local_cache(ds):
         pytorch_small_shuffle_helper(0, 16, dls)
 
 
-@pytest.mark.slow
 @requires_torch
 def test_groups(local_ds, compressed_image_paths):
     img1 = deeplake.read(compressed_image_paths["jpeg"][0])
