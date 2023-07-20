@@ -1,6 +1,5 @@
 import os
 import logging
-import platform
 
 # Disable crash reporting before running tests
 # This MUST come before hub imports to bypass import publication.
@@ -11,11 +10,6 @@ os.environ["DEEPLAKE_PYTEST_ENABLED"] = "true"
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 logging.disable(logging.INFO)
-
-if platform.system() == "Darwin":
-    # Get "Cannot set number of intraop threads after parallel work has started or after set_num_threads call when using native parallel backend" errors,
-    # especially in test_pytorch without this setting
-    os.environ["OMP_NUM_THREADS"] = "1"
 
 from deeplake.core.lock import _LOCKS, _REFS
 
