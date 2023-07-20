@@ -25,6 +25,7 @@ from deeplake.util.transform import (
     store_data_slice,
     store_data_slice_with_pbar,
     check_checkpoint_interval,
+    len_data_in,
 )
 from deeplake.util.encoder import merge_all_meta_info
 from deeplake.util.exceptions import (
@@ -234,7 +235,7 @@ class Pipeline:
             skip_ok = True
 
         checkpointing_enabled = checkpoint_interval > 0
-        total_samples = len(data_in)
+        total_samples = len_data_in(data_in)
         if checkpointing_enabled:
             check_checkpoint_interval(
                 data_in,
@@ -245,7 +246,7 @@ class Pipeline:
             )
             datas_in = [
                 data_in[i : i + checkpoint_interval]
-                for i in range(0, len(data_in), checkpoint_interval)
+                for i in range(0, len_data_in(data_in), checkpoint_interval)
             ]
 
         else:
@@ -254,7 +255,7 @@ class Pipeline:
         samples_processed = 0
         desc = get_pbar_description(self.functions)
         if progressbar:
-            pbar = get_progress_bar(len(data_in), desc)
+            pbar = get_progress_bar(len_data_in(data_in), desc)
             pqueue = compute_provider.create_queue()
         else:
             pbar, pqueue = None, None
@@ -271,7 +272,7 @@ class Pipeline:
                     total_samples_processed=samples_processed,
                 )
             progress = round(
-                (samples_processed + len(data_in)) / total_samples * 100, 2
+                (samples_processed + len_data_in(data_in)) / total_samples * 100, 2
             )
             end = progress == 100
             progress_args = {"compute_id": compute_id, "progress": progress, "end": end}
@@ -294,7 +295,7 @@ class Pipeline:
                     **kwargs,
                 )
                 target_ds._send_compute_progress(**progress_args, status="success")
-                samples_processed += len(data_in)
+                samples_processed += len_data_in(data_in)
                 completed = end
             except Exception as e:
                 if checkpointing_enabled:
@@ -422,7 +423,7 @@ class Pipeline:
                 result = compute.map_with_progress_bar(
                     store_data_slice_with_pbar,
                     map_inp,
-                    total_length=len(data_in),
+                    total_length=len_data_in(data_in),
                     desc=desc,
                     pbar=pbar,
                     pqueue=pqueue,
