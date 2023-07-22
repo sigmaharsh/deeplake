@@ -11,6 +11,9 @@ on:
   push:
     branches:
       - '**'
+  pull_request:
+    branches:
+      - 'main'
 
 concurrency:
   cancel-in-progress: true
@@ -29,7 +32,7 @@ jobs:
           import os
           import json
 
-          if ${{ contains(github.event.pull_request.labels.*.name, 'quick-tests') }} == "true" :
+          if ${{ github.event_name }} == "pull_request" and ${{ contains(github.event.pull_request.labels.*.name, 'quick-tests') }} == "true" :
             matrix = {
               "os": [
                 "ubuntu-latest", 
@@ -41,7 +44,7 @@ jobs:
                 "local",
               ]
             }
-          elif ${{ contains(github.event.pull_request.labels.*.name, 'quick-tests') || github.ref_name == 'main' || startsWith( github.ref_name, 'release/' )) }} == "true":
+          elif ${{ github.event_name }} == "push" and ${{ github.ref_name == 'main' || startsWith( github.ref_name, 'release/' ) }} == "true":
             matrix = {
               "os": [
                 "ubuntu-latest", 
