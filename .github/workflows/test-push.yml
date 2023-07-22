@@ -32,7 +32,7 @@ jobs:
           import os
           import json
 
-          if ${{ github.event_name }} == "pull_request" and ${{ contains(github.event.pull_request.labels.*.name, 'quick-tests') }} == "true" :
+          if "${{ github.event_name }}" == "pull_request" and "${{ contains(github.event.pull_request.labels.*.name, 'quick-tests') }}" == "true" :
             matrix = {
               "os": [
                 "ubuntu-latest", 
@@ -44,7 +44,7 @@ jobs:
                 "local",
               ]
             }
-          elif ${{ github.event_name }} == "push" and ${{ github.ref_name == 'main' || startsWith( github.ref_name, 'release/' ) }} == "true":
+          elif "${{ github.event_name }}" == "push" and "${{ github.ref_name == 'main' || startsWith( github.ref_name, 'release/' ) }}" == "true":
             matrix = {
               "os": [
                 "ubuntu-latest", 
