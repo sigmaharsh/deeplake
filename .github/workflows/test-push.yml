@@ -97,7 +97,7 @@ jobs:
     with:
       repo: ${{ github.repository }}
       ref: ${{ github.sha }}
-      testMatrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
+      testMatrix: ${{ needs.setup.outputs.matrix }}
 
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
