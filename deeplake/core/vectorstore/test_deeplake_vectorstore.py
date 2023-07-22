@@ -728,6 +728,7 @@ def assert_updated_vector_store(
     indirect=True,
 )
 @pytest.mark.parametrize("init_embedding_function", [embedding_fn3, None])
+@pytest.mark.slow
 def test_update_embedding(
     ds_generator,
     vector_store_hash_ids,
@@ -749,6 +750,7 @@ def test_update_embedding(
         overwrite=True,
         verbose=False,
         embedding_function=init_embedding_function,
+        token=ds.token,
     )
 
     # add data to the dataset:
@@ -840,7 +842,7 @@ def test_update_embedding(
             num_changed_samples=5,
         )
 
-    vector_store.delete_by_path(path)
+    vector_store.delete_by_path(path, token=ds.token)
 
     # dataset has a multiple embedding_tensor:
     tensors = [
@@ -892,6 +894,7 @@ def test_update_embedding(
         verbose=False,
         embedding_function=init_embedding_function,
         tensor_params=tensors,
+        token=ds.token,
     )
 
     vector_store.add(
@@ -1067,7 +1070,7 @@ def test_update_embedding(
         "compute_engine",
         num_changed_samples=5,
     )
-    vector_store.delete_by_path(path)
+    vector_store.delete_by_path(path, token=ds.token)
 
 
 @pytest.mark.slow
