@@ -19,75 +19,82 @@ concurrency:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.setup.outputs.matrix }}
     steps:
-      - name: Setup default config
+      - name: Setup tests matrix
+        id: setup
+        shell: python
         run: |
-          echo "TEST_MATRIX=${{ toJSON({
-            os: [
-              "ubuntu-latest", 
-              "windows-latest", 
-              "macos-latest"
-            ],
-            python: [
-              "3.10", 
-            ], storage: [
-              "local",
-              "hub-cloud",
-              "s3",
-              "gcs",
-              "azure",
-              "gdrive",
-            ]
-            }) }}" >> "$GITHUB_ENV"
+          import os
+          import json
+
+          if ${{ contains(github.event.pull_request.labels.*.name, 'quick-tests') }} == "true" :
+            matrix = {
+              "os": [
+                "ubuntu-latest", 
+              ],
+              "python": [
+                "3.10", 
+              ], 
+              "storage": [
+                "local",
+              ]
+            }
+          elif ${{ contains(github.event.pull_request.labels.*.name, 'quick-tests') || github.ref_name == 'main' || startsWith( github.ref_name, 'release/' )) }} == "true":
+            matrix = {
+              "os": [
+                "ubuntu-latest", 
+                "windows-latest", 
+                "macos-latest"
+              ],
+              "python": [
+                "3.11",
+                "3.10", 
+                "3.9", 
+                "3.8", 
+              ], 
+              "storage": [
+                "local",
+                "hub-cloud",
+                "s3",
+                "gcs",
+                "azure",
+                "gdrive",
+              ]
+            }
+          else:
+            matrix = {
+              "os": [
+                "ubuntu-latest", 
+                "windows-latest", 
+                "macos-latest"
+              ],
+              "python": [
+                "3.10", 
+              ], 
+              "storage": [
+                "local",
+                "hub-cloud",
+                "s3",
+                "gcs",
+                "azure",
+                "gdrive",
+              ]
+            }
           
-
-      - name: Setup quick test config
-        if: contains(github.event.pull_request.labels.*.name, 'quick-tests')
-        run: |
-          echo "TEST_MATRIX=${{ toJSON({
-            os: [
-              "ubuntu-latest", 
-            ],
-            python: [
-              "3.10", 
-            ], storage: [
-              "local",
-            ]
-            }) }}" >> "$GITHUB_ENV"
-
-
-      - name: Setup full tests
-        if: ( contains(github.event.pull_request.labels.*.name, 'quick-tests') || github.ref_name == 'main' || startsWith( github.ref_name, 'release/' ))
-        run: |
-          echo "TEST_MATRIX=${{ toJSON({
-            os: [
-              "ubuntu-latest", 
-              "windows-latest", 
-              "macos-latest"
-            ],
-            python: [
-              "3.11",
-              "3.10", 
-              "3.9", 
-              "3.8", 
-            ], storage: [
-              "local",
-              "hub-cloud",
-              "s3",
-              "gcs",
-              "azure",
-              "gdrive",
-            ]
-            }) }}" >> "$GITHUB_ENV"
+          with open(os.environ.get("GITHUB_OUTPUT"), "a") as file:
+            file.write("matrix=%s\n" % json.dumps(matrix))
 
   test:
     name: Test
+    needs: setup
     uses: activeloopai/shared-github-actions/.github/workflows/full_test.yml@identify_slow_tests
     if: github.repository == 'activeloopai/deeplake'
     with:
       repo: ${{ github.repository }}
       ref: ${{ github.sha }}
-      testMatrix: ${{ env.TEST_MATRIX }}
+      testMatrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
 
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
