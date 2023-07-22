@@ -22,50 +22,63 @@ jobs:
     steps:
       - name: Setup default config
         run: |
-          echo "MATRIX_OS=${{ toJSON([
-            "ubuntu-latest", 
-            "windows-latest", 
-            "macos-latest"
-          ]) }}" >> "$GITHUB_ENV"
-
-          echo "OS_MATRIX=${{ toJSON([
-            "3.10", 
-          ]) }}" >> "$GITHUB_ENV"
-
-          echo "PYTHON_MATRIX=${{ toJSON([
-            "3.10", 
-          ]) }}" >> "$GITHUB_ENV"
-
-          echo "STORAGE_MATRIX=${{ toJSON([
-            "local",
-            "hub-cloud",
-            "s3",
-            "gcs",
-            "azure",
-            "gdrive",
-          ]) }}" >> "$GITHUB_ENV"
+          echo "TEST_MATRIX=${{ toJSON({
+            os: [
+              "ubuntu-latest", 
+              "windows-latest", 
+              "macos-latest"
+            ],
+            python: [
+              "3.10", 
+            ], storage: [
+              "local",
+              "hub-cloud",
+              "s3",
+              "gcs",
+              "azure",
+              "gdrive",
+            ]
+            }) }}" >> "$GITHUB_ENV"
+          
 
       - name: Setup quick test config
         if: contains(github.event.pull_request.labels.*.name, 'quick-tests')
         run: |
-          echo "STORAGE_MATRIX=${{ toJSON([
-            "local",
-          ]) }}" >> "$GITHUB_ENV"
-          
-          echo "MATRIX_OS=${{ toJSON([
-            "ubuntu-latest", 
-          ]) }}" >> "$GITHUB_ENV"
+          echo "TEST_MATRIX=${{ toJSON({
+            os: [
+              "ubuntu-latest", 
+            ],
+            python: [
+              "3.10", 
+            ], storage: [
+              "local",
+            ]
+            }) }}" >> "$GITHUB_ENV"
 
 
       - name: Setup full tests
         if: ( contains(github.event.pull_request.labels.*.name, 'quick-tests') || github.ref_name == 'main' || startsWith( github.ref_name, 'release/' ))
         run: |
-          echo "PYTHON_MATRIX=${{ toJSON([
-            "3.11", 
-            "3.10", 
-            "3.9", 
-            "3.8", 
-          ]) }}" >> "$GITHUB_ENV"
+          echo "TEST_MATRIX=${{ toJSON({
+            os: [
+              "ubuntu-latest", 
+              "windows-latest", 
+              "macos-latest"
+            ],
+            python: [
+              "3.11",
+              "3.10", 
+              "3.9", 
+              "3.8", 
+            ], storage: [
+              "local",
+              "hub-cloud",
+              "s3",
+              "gcs",
+              "azure",
+              "gdrive",
+            ]
+            }) }}" >> "$GITHUB_ENV"
 
   test:
     name: Test
@@ -74,9 +87,7 @@ jobs:
     with:
       repo: ${{ github.repository }}
       ref: ${{ github.sha }}
-      osMatrix: ${{ env.OS_MATRIX }}
-      pythonMatrix: ${{ env.PYTHON_MATRIX }}
-      storageMatrix: ${{ env.STORAGE_MATRIX
+      testMatrix: ${{ env.TEST_MATRIX }}
 
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
