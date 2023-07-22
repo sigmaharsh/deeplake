@@ -10,11 +10,15 @@ permissions:
 on:
   push:
     branches:
-      - '**'
+      - 'main'
+      - 'release/**'
+  pull_request:
+    branches:
+      - "main"
 
 concurrency:
   cancel-in-progress: true
-  group: ${{ github.workflow }}-${{ github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
 
 jobs:
   setup:
