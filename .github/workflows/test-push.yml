@@ -13,8 +13,6 @@ on:
       - 'main'
       - 'release/**'
   pull_request:
-    branches:
-      - "main"
 
 concurrency:
   cancel-in-progress: true
@@ -32,63 +30,62 @@ jobs:
         run: |
           import os
           import json
-
-          if "${{ github.event_name }}" == "pull_request" and "${{ contains(github.event.pull_request.labels.*.name, 'quick-tests') }}" == "true" :
-            matrix = {
+          
+          matrix = {
               "os": [
-                "ubuntu-latest", 
+                  "ubuntu-latest",
+                  "windows-latest",
               ],
               "python-version": [
-                "3.10", 
-              ], 
-              "storage": [
-                "local",
-              ]
-            }
-          elif "${{ github.event_name }}" == "push" and "${{ github.ref_name == 'main' || startsWith( github.ref_name, 'release/' ) }}" == "true":
-            matrix = {
-              "os": [
-                "ubuntu-latest", 
-                "windows-latest", 
-                "macos-latest"
+                  "3.10",
               ],
-              "python-version": [
-                "3.11",
-                "3.10", 
-                "3.9", 
-                "3.8", 
-              ], 
               "storage": [
-                "local",
-                "hub-cloud",
-                "s3",
-                "gcs",
-                "azure",
-                "gdrive",
+                  "local",
+                  "hub-cloud",
+                  "s3",
+                  "gcs",
+                  "azure",
+                  "gdrive",
               ]
-            }
+          }
+          
+          if "${{ github.event_name }}" == "pull_request":
+              if "${{ contains(github.event.pull_request.labels.*.name, 'quick-tests') }}" == "true":
+                  matrix = {
+                      "os": [
+                          "ubuntu-latest",
+                      ],
+                      "python-version": [
+                          "3.10",
+                      ],
+                      "storage": [
+                          "local",
+                      ]
+                  }
+          
+              if "${{ contains(github.event.pull_request.labels.*.name, 'test-macos') }}" == "true":
+                  matrix["os"].append("macos-latest")
+          
+          elif "${{ github.event_name }}" == "push":
+              if "${{ github.ref_name == 'main' || startsWith( github.ref_name, 'release/' ) }}" == "true":
+                  matrix["os"] = [
+                      "macos-latest",
+                      "ubuntu-latest",
+                      "windows-latest",
+                  ]
+                  matrix["python-version"] = [
+                      "3.11",
+                      "3.10",
+                      "3.9",
+                      "3.8",
+                  ]
+              else:
+                  raise Exception("Unexpected branch")
           else:
-            matrix = {
-              "os": [
-                "ubuntu-latest", 
-                "windows-latest", 
-                "macos-latest"
-              ],
-              "python-version": [
-                "3.10", 
-              ], 
-              "storage": [
-                "local",
-                "hub-cloud",
-                "s3",
-                "gcs",
-                "azure",
-                "gdrive",
-              ]
-            }
+              raise Exception("Unexpected event")
           
           with open(os.environ.get("GITHUB_OUTPUT"), "a") as file:
-            file.write("matrix=%s\n" % json.dumps(matrix))
+              file.write("matrix=%s\n" % json.dumps(matrix))
 
   test:
     name: Test
