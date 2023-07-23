@@ -13,6 +13,12 @@ on:
       - 'main'
       - 'release/**'
   pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+      - ready_for_review
 
 concurrency:
   cancel-in-progress: true
@@ -21,6 +27,7 @@ concurrency:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (! github.event.pull_request.draft)
     outputs:
       matrix: ${{ steps.setup.outputs.matrix }}
     steps:
@@ -65,6 +72,19 @@ jobs:
           
               if "${{ contains(github.event.pull_request.labels.*.name, 'test-macos') }}" == "true":
                   matrix["os"].append("macos-latest")
+
+              if "${{ contains(github.event.pull_request.labels.*.name, 'full-tests') }}" == "true":
+                  matrix["os"] = [
+                      "macos-latest",
+                      "ubuntu-latest",
+                      "windows-latest",
+                  ]
+                  matrix["python-version"] = [
+                      "3.11",
+                      "3.10",
+                      "3.9",
+                      "3.8",
+                  ]
           
           elif "${{ github.event_name }}" == "push":
               if "${{ github.ref_name == 'main' || startsWith( github.ref_name, 'release/' ) }}" == "true":
