@@ -47,8 +47,8 @@ jobs:
                   "3.10",
               ],
               "storage": [
-                "local hub-cloud",
-                "s3 gcs azure gdrive"
+                "--local --hub-cloud",
+                "--s3 --gcs --azure --gdrive"
               ]
           }
           
@@ -82,8 +82,8 @@ jobs:
                       "3.8",
                   ]
                   matrix["storage"] = [
-                    "local hub-cloud",
-                    "s3 gcs azure gdrive"
+                    "--local --hub-cloud",
+                    "--s3 --gcs --azure --gdrive"
                   ]
           
           elif "${{ github.event_name }}" == "push":
