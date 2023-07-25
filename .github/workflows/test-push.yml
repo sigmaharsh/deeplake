@@ -104,7 +104,21 @@ jobs:
           else:
               raise Exception("Unexpected event")
           
-          with open(os.environ.get("GITHUB_OUTPUT"), "a") as file:
+          matrix["exclude"] = [
+             exclude: [
+                [
+                  os: "macos-latest",
+                  python-version: "3.11",
+                ],
+                [
+                  os: "windows-latest",
+                  python-version: "3.11",
+                ],
+            ]
+          ]
+            
+            
+            with open(os.environ.get("GITHUB_OUTPUT"), "a") as file:
               file.write("matrix=%s\n" % json.dumps(matrix))
 
   test:
