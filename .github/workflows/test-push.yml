@@ -105,16 +105,14 @@ jobs:
               raise Exception("Unexpected event")
           
           matrix["exclude"] = [
-             exclude: [
-                [
-                  os: "macos-latest",
-                  python-version: "3.11",
-                ],
-                [
-                  os: "windows-latest",
-                  python-version: "3.11",
-                ],
-            ]
+            {
+              "os": "macos-latest",
+              "python-version": "3.11",
+            },
+            {
+              "os": "windows-latest",
+              "python-version": "3.11",
+            },
           ]
             
             
