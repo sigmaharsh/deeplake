@@ -115,9 +115,8 @@ jobs:
             },
           ]
             
-            
-            with open(os.environ.get("GITHUB_OUTPUT"), "a") as file:
-              file.write("matrix=%s\n" % json.dumps(matrix))
+          with open(os.environ.get("GITHUB_OUTPUT"), "a") as file:
+            file.write("matrix=%s\n" % json.dumps(matrix))
 
   test:
     name: Test
