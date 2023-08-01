@@ -82,7 +82,7 @@ jobs:
                       "3.8",
                   ]
                   matrix["storage"] = [
-                    "--hub-cloud --no-memory",
+                    "--hub-cloud --memory-skip",
                     "--s3 --gcs --azure --gdrive --local"
                   ]
           
