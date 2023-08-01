@@ -216,7 +216,7 @@ def test_json_transform(ds, compression, scheduler="threaded"):
         ds.json.append(stuff)
         return ds
 
-    upload().eval(items, ds, num_workers=2, scheduler=scheduler, progressbar=False)
+    upload().eval(items, ds, num_workers=2, scheduler=scheduler)
     assert ds.json.data()["value"] == expected
     with pytest.raises(Exception):
         ds.json.list()

@@ -33,7 +33,7 @@ def test_before_split(convert_to_pathlib):
 
 def test_split():
     ds = load_dataset("glue", "mrpc", split="train[:5%]")
-    dl_ds = ingest_huggingface(ds, "mem://xyz", use_progressbar=False)
+    dl_ds = ingest_huggingface(ds, "mem://xyz")
 
     assert list(dl_ds.tensors) == ds.column_names
 
@@ -81,7 +81,7 @@ def test_seq():
     data = {"id": [0, 1], "seq": [arr1, arr2]}
     ds = Dataset.from_dict(data)
 
-    dl_ds = ingest_huggingface(ds, "mem://xyz", use_progressbar=False)
+    dl_ds = ingest_huggingface(ds, "mem://xyz")
 
     assert set(dl_ds.tensors) == {"id", "seq"}
     assert_array_equal(dl_ds["seq"], [arr1, arr2])

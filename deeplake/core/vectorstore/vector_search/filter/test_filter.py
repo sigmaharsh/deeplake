@@ -17,13 +17,9 @@ def test_attribute_based_filtering():
         metadata = x["metadata"].data()["value"]
         return metadata["k"] == 1
 
-    view_dict = filter_utils.attribute_based_filtering_python(
-        ds, filter=filter_dict, progressbar=False
-    )
+    view_dict = filter_utils.attribute_based_filtering_python(ds, filter=filter_dict)
 
-    view_udf = filter_utils.attribute_based_filtering_python(
-        ds, filter=filter_udf, progressbar=False
-    )
+    view_udf = filter_utils.attribute_based_filtering_python(ds, filter=filter_udf)
 
     view_tql, tql_filter = filter_utils.attribute_based_filtering_tql(
         ds, filter=filter_dict

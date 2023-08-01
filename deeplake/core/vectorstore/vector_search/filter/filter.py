@@ -23,9 +23,7 @@ def dp_filter_python(x: dict, filter: Dict) -> bool:
 
 
 def attribute_based_filtering_python(
-    view,
-    filter: Optional[Union[Dict, Callable]] = None,
-    progressbar: Optional[bool] = True,
+    view, filter: Optional[Union[Dict, Callable]] = None
 ):
     if len(view) == 0:
         raise ValueError("specified dataset is empty")
@@ -33,7 +31,7 @@ def attribute_based_filtering_python(
         if isinstance(filter, dict):
             filter = partial(dp_filter_python, filter=filter)
 
-        view = view.filter(filter, progressbar=progressbar)
+        view = view.filter(filter)
 
     return view
 
@@ -57,7 +55,7 @@ def attribute_based_filtering_tql(
 
 
 def exact_text_search(view, query):
-    view = view.filter(lambda x: query in x["text"].data()["value"], progressbar=False)
+    view = view.filter(lambda x: query in x["text"].data()["value"])
     scores = [1.0] * len(view)
 
     if len(view) == 0:
@@ -72,7 +70,7 @@ def exact_text_search(view, query):
 
 def get_id_indices(dataset, ids):
     filtered_ids = None
-    view = dataset.filter(lambda x: x["ids"].data()["value"] in ids, progressbar=False)
+    view = dataset.filter(lambda x: x["ids"].data()["value"] in ids)
     filtered_ids = list(view.sample_indices)
 
     if len(filtered_ids) != len(ids):
@@ -93,7 +91,7 @@ def get_ids_that_does_not_exist(ids, filtered_ids):
 
 def get_filtered_ids(dataset, filter):
     filtered_ids = None
-    view = dataset.filter(partial(dp_filter_python, filter=filter), progressbar=False)
+    view = dataset.filter(partial(dp_filter_python, filter=filter))
     filtered_ids = list(view.sample_indices)
     if len(filtered_ids) == 0:
         raise ValueError(f"{filter} does not exist in the dataset.")

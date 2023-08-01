@@ -410,7 +410,6 @@ class Dataset:
         state["libdeeplake_dataset"] = None
         state["_vc_info_updated"] = False
         state["_locked_out"] = False
-        state["_lock_timeout"] = 0
         self.__dict__.update(state)
         self.__dict__["base_storage"] = get_base_storage(self.storage)
         # clear cache while restoring
@@ -3266,7 +3265,6 @@ class Dataset:
                         unlink=unlink,
                         create_vds_index_tensor=True,
                         ignore_errors=ignore_errors,
-                        progressbar=self.verbose,
                     )
                 else:
                     vds.create_tensor(
@@ -3275,7 +3273,6 @@ class Dataset:
                         create_shape_tensor=False,
                         create_id_tensor=False,
                         create_sample_info_tensor=False,
-                        verbose=self.verbose,
                     ).extend(
                         np.array(
                             tuple(self.index.values[0].indices(self.num_samples)),
