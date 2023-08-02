@@ -65,6 +65,7 @@ def test_tql_metric_to_tql_str(metric, limit=10):
     assert parsed_query == METRIC_FUNC_TO_QUERY_STRING[metric]
 
 
+@pytest.mark.slow
 @requires_libdeeplake
 def test_search_resulting_shapes():
     vector_store = VectorStore("hub://activeloop/paul_graham_essay", read_only=True)
