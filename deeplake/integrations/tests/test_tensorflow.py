@@ -39,6 +39,7 @@ def test_tensorflow_small(local_ds):
 
 
 @requires_tensorflow
+@pytest.mark.slow
 def test_corrupt_dataset(local_ds, corrupt_image_paths, compressed_image_paths):
     img_good = deeplake.read(compressed_image_paths["jpeg"][0])
     img_bad = deeplake.read(corrupt_image_paths["jpeg"])
@@ -57,6 +58,7 @@ def test_corrupt_dataset(local_ds, corrupt_image_paths, compressed_image_paths):
 
 
 @requires_tensorflow
+@pytest.mark.slow
 def test_groups(local_ds, compressed_image_paths):
     img1 = deeplake.read(compressed_image_paths["jpeg"][0])
     img2 = deeplake.read(compressed_image_paths["png"][0])
@@ -106,6 +108,7 @@ def test_tensorflow_string_objects(local_ds: Dataset):
 
 @requires_tensorflow
 @pytest.mark.parametrize("compression", [None, "jpeg"])
+@pytest.mark.slow
 def test_tensorflow_tobytes(local_ds, compressed_image_paths, compression):
     ds = local_ds
     with ds:

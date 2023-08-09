@@ -25,6 +25,7 @@ def deeplake_compute_filter(sample_in, mod):
     return val % mod == 0
 
 
+@pytest.mark.slow
 def _populate_data_linked(ds, n, compressed_image_paths, labels):
     with ds:
         if "images" not in ds:
@@ -331,6 +332,7 @@ def test_query_shape(local_ds):
         assert len(ds.filter(f"image.shape == {shape}")) == count
 
 
+@pytest.mark.slow
 def test_query_sample_info(local_ds, compressed_image_paths):
     ds = local_ds
     with ds:

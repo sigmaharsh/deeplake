@@ -395,6 +395,7 @@ def test_readonly_with_two_workers(local_ds):
 
 @requires_torch
 @pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
+@pytest.mark.slow
 def test_corrupt_dataset(local_ds, corrupt_image_paths, compressed_image_paths):
     img_good = deeplake.read(compressed_image_paths["jpeg"][0])
     img_bad = deeplake.read(corrupt_image_paths["jpeg"])

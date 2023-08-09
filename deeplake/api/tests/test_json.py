@@ -45,6 +45,7 @@ def test_json_with_numpy(memory_ds):
         )
 
 
+@pytest.mark.slow
 def test_json_with_deeplake_sample(memory_ds, compressed_image_paths):
     ds = memory_ds
     ds.create_tensor("json", htype="json")
@@ -137,6 +138,7 @@ def test_list_with_numpy(memory_ds):
         assert actual[1:] == expected[1:]
 
 
+@pytest.mark.slow
 def test_list_with_deeplake_sample(memory_ds, compressed_image_paths):
     ds = memory_ds
     ds.create_tensor("list", htype="list")

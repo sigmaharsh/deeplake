@@ -275,6 +275,7 @@ def test_audio(local_ds, compression, audio_paths):
         np.testing.assert_array_equal(decompressed[: len(arr), :], arr)  # type: ignore
 
 
+@pytest.mark.slow
 def test_exif(memory_ds, compressed_image_paths):
     ds = memory_ds
     with ds:

@@ -6,6 +6,7 @@ image_compressions = ["mpo", "fli"]
 
 
 @pytest.mark.parametrize("compression", image_compressions)
+@pytest.mark.slow
 def test_array(compression, compressed_image_paths):
     # TODO: check dtypes and no information loss
     array = np.array(deeplake.read(compressed_image_paths[compression][0]))

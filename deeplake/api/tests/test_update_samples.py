@@ -358,6 +358,7 @@ def test_sequence_htype_with_broadcasting(memory_ds):
 @pytest.mark.parametrize(
     "shape", [(13, 17, 3), pytest.param((1007, 3001, 3), marks=pytest.mark.slow)]
 )
+@pytest.mark.slow
 def test_sequence_htype_with_deeplake_read(local_ds, shape, compressed_image_paths):
     ds = local_ds
     imgs = list(map(deeplake.read, compressed_image_paths["jpeg"][:3]))
