@@ -91,7 +91,7 @@ def pytest_runtestloop(session: pytest.Session):
     if "not slow" in session.config.known_args_namespace.markexpr:
         # Ensuring fast tests don't take too long...
         def stop_tests():
-            time.sleep(10) # 10 minutes should be more than enough for the fast tests to run
+            time.sleep(10 * 60) # 10 minutes should be more than enough for the fast tests to run
 
             print("!! Tests with -m 'not slow' should not have taken so long !!")
             faulthandler.dump_traceback()
