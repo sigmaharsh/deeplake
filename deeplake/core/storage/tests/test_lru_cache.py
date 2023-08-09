@@ -81,8 +81,8 @@ def test_get_bytes():
 
     for start in range(0, 9):
         assert (
-                str(lru_cache.get_bytes("a/ten", start, start + 1), "utf-8")
-                == f"{start + 1}"
+            str(lru_cache.get_bytes("a/ten", start, start + 1), "utf-8")
+            == f"{start + 1}"
         )
 
     assert list(cache_ds.dict.keys()) == []

@@ -1,5 +1,9 @@
+import _thread
+import faulthandler
 import os
 import logging
+import threading
+import time
 
 # Disable crash reporting before running tests
 # This MUST come before hub imports to bypass import publication.
@@ -81,6 +85,20 @@ def pytest_addoption(parser):
     parser.addoption(
         KAGGLE_OPT, action="store_true", help="Kaggle tests will run if enabled."
     )
+
+
+def pytest_sessionstart(session: pytest.Session):
+    if "not slow" in session.config.known_args_namespace.markexpr:
+        # Ensuring fast tests don't take too long...
+        def stop_tests():
+            time.sleep(10 * 60) # 10 minutes should be more than enough for the fast tests to run
+            print("!! Tests with -m 'not slow' should not have taken so long. Dumping thread traceback and sending a keyboard interrupt !!")
+            faulthandler.dump_traceback()
+
+            _thread.interrupt_main()
+
+        t = threading.Thread(target=stop_tests, daemon=True)
+        t.start()
 
 
 def print_session_id():

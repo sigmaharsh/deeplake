@@ -407,7 +407,13 @@ def hub_cloud_path(request, hub_cloud_dev_token):
     # clear storage unless flagged otherwise
     if not is_opt_true(request, KEEP_STORAGE_OPT):
         try:
-            deeplake.delete(path, force=True, large_ok=True, token=hub_cloud_dev_token, spinner=False)
+            deeplake.delete(
+                path,
+                force=True,
+                large_ok=True,
+                token=hub_cloud_dev_token,
+                spinner=False,
+            )
         except Exception:
             # TODO: investigate flakey `BadRequestException:
             # Invalid Request. One or more request parameters is incorrect.`

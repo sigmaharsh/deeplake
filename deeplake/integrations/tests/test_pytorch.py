@@ -69,6 +69,7 @@ def pytorch_small_shuffle_helper(start, end, dataloader):
 
 
 @requires_torch
+@pytest.mark.slow
 @enabled_non_gdrive_datasets
 @pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_pytorch_small(ds):
@@ -149,6 +150,7 @@ def test_pytorch_small(ds):
 
 
 @requires_torch
+@pytest.mark.slow
 @enabled_non_gdrive_datasets
 @pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_pytorch_transform(ds):
@@ -229,6 +231,7 @@ def test_pytorch_transform(ds):
 
 @requires_torch
 @enabled_non_gdrive_datasets
+@pytest.mark.slow
 @pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_pytorch_transform_dict(ds):
     with ds:
@@ -308,6 +311,7 @@ def test_pytorch_with_compression(ds: Dataset):
 
 @requires_torch
 @enabled_non_gdrive_datasets
+@pytest.mark.slow
 @pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_custom_tensor_order(ds):
     with ds:
@@ -412,6 +416,7 @@ def test_corrupt_dataset(local_ds, corrupt_image_paths, compressed_image_paths):
 
 @requires_torch
 @enabled_non_gdrive_datasets
+@pytest.mark.slow
 @pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_pytorch_local_cache(ds):
     with ds:
@@ -651,6 +656,7 @@ def run_ddp(rank, size, ds, q, backend="gloo"):
 
 @pytest.mark.slow
 @requires_torch
+@pytest.mark.slow
 @enabled_non_gdrive_datasets
 @pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_pytorch_ddp(ds):
