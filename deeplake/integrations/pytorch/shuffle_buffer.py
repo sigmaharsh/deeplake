@@ -1,4 +1,4 @@
-from typing import List, Any, Sequence, Optional
+from typing import List, Any, Sequence
 from random import randrange
 from functools import reduce
 from operator import mul

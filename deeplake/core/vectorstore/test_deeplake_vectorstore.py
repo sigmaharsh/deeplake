@@ -1070,7 +1070,7 @@ def test_update_embedding(
         "compute_engine",
         num_changed_samples=5,
     )
-    vector_store.delete_by_path(path, token=ds.token)
+    vector_store.delete_by_path(path + "_multi", token=ds.token)
 
 
 @pytest.mark.slow
