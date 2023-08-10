@@ -47,8 +47,8 @@ jobs:
                   "3.10",
               ],
               "storage": [
-                "--hub-cloud",
-                "--s3 --gcs --azure --gdrive --local"
+                  "--hub-cloud --local",
+                  "--s3 --gcs --azure --gdrive --memory-skip"
               ]
           }
           
@@ -82,8 +82,8 @@ jobs:
                       "3.8",
                   ]
                   matrix["storage"] = [
-                    "--hub-cloud --memory-skip",
-                    "--s3 --gcs --azure --gdrive --local"
+                    "--hub-cloud --local",
+                    "--s3 --gcs --azure --gdrive --memory-skip"
                   ]
           
           elif "${{ github.event_name }}" == "push":
