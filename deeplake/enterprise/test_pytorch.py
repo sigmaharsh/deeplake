@@ -159,6 +159,20 @@ def test_pytorch_transform(hub_cloud_ds):
 
 
 @pytest.mark.slow
+@requires_libdeeplake
+def test_inequal_tensors_dataloader_length(local_auth_ds):
+    with local_auth_ds as ds:
+        ds.create_tensor("images")
+        ds.create_tensor("label")
+        ds.images.extend(([i * np.ones((i + 1, i + 1)) for i in range(16)]))
+
+    ld = local_auth_ds.dataloader().batch(1).pytorch()
+    assert len(ld) == 0
+    ld1 = local_auth_ds.dataloader().batch(2).pytorch(tensors=["images"])
+    assert len(ld1) == 8
+
+
+@pytest.mark.slow
 @requires_torch
 @requires_libdeeplake
 @pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
