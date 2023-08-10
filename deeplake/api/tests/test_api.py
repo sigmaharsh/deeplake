@@ -2229,6 +2229,7 @@ def test_ignore_temp_tensors(local_path):
         assert ds.__temptensor[0].numpy() == 123
 
 
+@pytest.mark.slow
 def test_empty_sample_partial_read(s3_ds):
     with s3_ds as ds:
         ds.create_tensor("xyz")
