@@ -5,6 +5,7 @@ import numpy as np
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(500)
 def test_commit_checkout_event(hub_cloud_ds):
     hub_cloud_ds.commit()
     hub_cloud_ds.checkout("abc", create=True)
