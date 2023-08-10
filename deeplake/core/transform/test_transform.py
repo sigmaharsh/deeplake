@@ -1298,6 +1298,7 @@ def test_none_rechunk_post_transform(local_ds):
     assert num_chunks == 2
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "scheduler",
     ["serial", "threaded", pytest.param("processed", marks=pytest.mark.skip)],

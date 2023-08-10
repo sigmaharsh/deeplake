@@ -16,7 +16,6 @@ from deeplake.core.index.index import IndexEntry
 from deeplake.core.storage.memory import MemoryProvider
 from deeplake.constants import KB
 
-from deeplake.tests.dataset_fixtures import enabled_non_gdrive_datasets
 from PIL import Image  # type: ignore
 
 try:
@@ -69,23 +68,20 @@ def pytorch_small_shuffle_helper(start, end, dataloader):
 
 
 @requires_torch
-@pytest.mark.slow
-@enabled_non_gdrive_datasets
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
-def test_pytorch_small(ds):
-    with ds:
-        ds.create_tensor("image", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
-        ds.image.extend(([i * np.ones((i + 1, i + 1)) for i in range(16)]))
-        ds.commit()
-        ds.create_tensor("image2", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
-        ds.image2.extend(np.array([i * np.ones((12, 12)) for i in range(16)]))
+def test_pytorch_small(local_ds):
+    with local_ds:
+        local_ds.create_tensor("image", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
+        local_ds.image.extend(([i * np.ones((i + 1, i + 1)) for i in range(16)]))
+        local_ds.commit()
+        local_ds.create_tensor("image2", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
+        local_ds.image2.extend(np.array([i * np.ones((12, 12)) for i in range(16)]))
 
-    if isinstance(get_base_storage(ds.storage), MemoryProvider):
+    if isinstance(get_base_storage(local_ds.storage), MemoryProvider):
         with pytest.raises(DatasetUnsupportedPytorch):
-            dl = ds.pytorch()
+            dl = local_ds.pytorch(num_workers=0)
         return
 
-    dl = ds.pytorch(num_workers=2, batch_size=1)
+    dl = local_ds.pytorch(num_workers=2, batch_size=1)
 
     assert len(dl.dataset) == 16
 
@@ -98,10 +94,10 @@ def test_pytorch_small(ds):
                 batch["image2"].numpy(), i * np.ones((1, 12, 12))
             )
 
-    dls = ds.pytorch(num_workers=2, batch_size=1, shuffle=True)
+    dls = local_ds.pytorch(num_workers=2, batch_size=1, shuffle=True)
     pytorch_small_shuffle_helper(0, 16, dls)
 
-    sub_ds = ds[5:]
+    sub_ds = local_ds[5:]
 
     sub_dl = sub_ds.pytorch(num_workers=0)
 
@@ -116,7 +112,7 @@ def test_pytorch_small(ds):
     sub_dls = sub_ds.pytorch(num_workers=0, batch_size=1, shuffle=True)
     pytorch_small_shuffle_helper(5, 16, sub_dls)
 
-    sub_ds2 = ds[8:12]
+    sub_ds2 = local_ds[8:12]
 
     sub_dl2 = sub_ds2.pytorch(num_workers=0, batch_size=1)
 
@@ -132,7 +128,7 @@ def test_pytorch_small(ds):
     sub_dls2 = sub_ds2.pytorch(num_workers=2, batch_size=1, shuffle=True)
     pytorch_small_shuffle_helper(8, 12, sub_dls2)
 
-    sub_ds3 = ds[:5]
+    sub_ds3 = local_ds[:5]
 
     sub_dl3 = sub_ds3.pytorch(num_workers=0, batch_size=1)
 
@@ -150,25 +146,22 @@ def test_pytorch_small(ds):
 
 
 @requires_torch
-@pytest.mark.slow
-@enabled_non_gdrive_datasets
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
-def test_pytorch_transform(ds):
+def test_pytorch_transform(local_ds):
     import torch
 
-    with ds:
-        ds.create_tensor("image", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
-        ds.image.extend(([i * np.ones((i + 1, i + 1)) for i in range(16)]))
-        ds.checkout("alt", create=True)
-        ds.create_tensor("image2", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
-        ds.image2.extend(np.array([i * np.ones((12, 12)) for i in range(16)]))
+    with local_ds:
+        local_ds.create_tensor("image", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
+        local_ds.image.extend(([i * np.ones((i + 1, i + 1)) for i in range(16)]))
+        local_ds.checkout("alt", create=True)
+        local_ds.create_tensor("image2", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
+        local_ds.image2.extend(np.array([i * np.ones((12, 12)) for i in range(16)]))
 
-    if isinstance(get_base_storage(ds.storage), MemoryProvider):
+    if isinstance(get_base_storage(local_ds.storage), MemoryProvider):
         with pytest.raises(DatasetUnsupportedPytorch):
-            dl = ds.pytorch(num_workers=0)
+            dl = local_ds.pytorch(num_workers=0)
         return
 
-    dl = ds.pytorch(
+    dl = local_ds.pytorch(
         num_workers=2,
         transform=to_tuple,
         batch_size=1,
@@ -192,7 +185,7 @@ def test_pytorch_transform(ds):
                 np.testing.assert_array_equal(actual_image, expected_image)
                 np.testing.assert_array_equal(actual_image2, expected_image2)
 
-    dls = ds.pytorch(
+    dls = local_ds.pytorch(
         num_workers=0,
         transform=to_tuple,
         batch_size=1,
@@ -230,24 +223,21 @@ def test_pytorch_transform(ds):
 
 
 @requires_torch
-@enabled_non_gdrive_datasets
-@pytest.mark.slow
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
-def test_pytorch_transform_dict(ds):
-    with ds:
-        ds.create_tensor("image", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
-        ds.image.extend(([i * np.ones((i + 1, i + 1)) for i in range(16)]))
-        ds.create_tensor("image2", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
-        ds.image2.extend(np.array([i * np.ones((12, 12)) for i in range(16)]))
-        ds.create_tensor("image3", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
-        ds.image3.extend(np.array([i * np.ones((12, 12)) for i in range(16)]))
+def test_pytorch_transform_dict(local_ds):
+    with local_ds:
+        local_ds.create_tensor("image", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
+        local_ds.image.extend(([i * np.ones((i + 1, i + 1)) for i in range(16)]))
+        local_ds.create_tensor("image2", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
+        local_ds.image2.extend(np.array([i * np.ones((12, 12)) for i in range(16)]))
+        local_ds.create_tensor("image3", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
+        local_ds.image3.extend(np.array([i * np.ones((12, 12)) for i in range(16)]))
 
-    if isinstance(get_base_storage(ds.storage), MemoryProvider):
+    if isinstance(get_base_storage(local_ds.storage), MemoryProvider):
         with pytest.raises(DatasetUnsupportedPytorch):
-            dl = ds.pytorch(num_workers=0)
+            dl = local_ds.pytorch(num_workers=0)
         return
 
-    dl = ds.pytorch(
+    dl = local_ds.pytorch(
         num_workers=2, transform={"image": double, "image2": None}, batch_size=1
     )
 
@@ -272,19 +262,16 @@ def test_pytorch_transform_dict(ds):
 
 
 @requires_torch
-@enabled_non_gdrive_datasets
-@pytest.mark.slow
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
-def test_pytorch_with_compression(ds: Dataset):
+def test_pytorch_with_compression(local_ds: Dataset):
     # TODO: chunk-wise compression for labels (right now they are uncompressed)
-    with ds:
-        images = ds.create_tensor(
+    with local_ds:
+        images = local_ds.create_tensor(
             "images",
             htype="image",
             sample_compression="png",
             max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE,
         )
-        labels = ds.create_tensor(
+        labels = local_ds.create_tensor(
             "labels", htype="class_label", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE
         )
 
@@ -293,13 +280,13 @@ def test_pytorch_with_compression(ds: Dataset):
         images.extend(np.ones((16, 12, 12, 3), dtype="uint8"))
         labels.extend(np.ones((16, 1), dtype="uint32"))
 
-    if isinstance(get_base_storage(ds.storage), MemoryProvider):
+    if isinstance(get_base_storage(local_ds.storage), MemoryProvider):
         with pytest.raises(DatasetUnsupportedPytorch):
-            dl = ds.pytorch(num_workers=0)
+            dl = local_ds.pytorch(num_workers=0)
         return
 
-    dl = ds.pytorch(num_workers=0, batch_size=1)
-    dls = ds.pytorch(num_workers=0, batch_size=1, shuffle=True)
+    dl = local_ds.pytorch(num_workers=0, batch_size=1)
+    dls = local_ds.pytorch(num_workers=0, batch_size=1, shuffle=True)
 
     for dataloader in [dl, dls]:
         for _ in range(2):
@@ -311,25 +298,22 @@ def test_pytorch_with_compression(ds: Dataset):
 
 
 @requires_torch
-@enabled_non_gdrive_datasets
-@pytest.mark.slow
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
-def test_custom_tensor_order(ds):
-    with ds:
+def test_custom_tensor_order(local_ds):
+    with local_ds:
         tensors = ["a", "b", "c", "d"]
         for t in tensors:
-            ds.create_tensor(t, max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
-            ds[t].extend(np.random.random((3, 4, 5)))
+            local_ds.create_tensor(t, max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
+            local_ds[t].extend(np.random.random((3, 4, 5)))
 
-    if isinstance(get_base_storage(ds.storage), MemoryProvider):
+    if isinstance(get_base_storage(local_ds.storage), MemoryProvider):
         with pytest.raises(DatasetUnsupportedPytorch):
-            dl = ds.pytorch()
+            dl = local_ds.pytorch(num_workers=0)
         return
 
     with pytest.raises(TensorDoesNotExistError):
-        dl = ds.pytorch(num_workers=0, tensors=["c", "d", "e"])
+        dl = local_ds.pytorch(num_workers=0, tensors=["c", "d", "e"])
 
-    dl = ds.pytorch(num_workers=0, tensors=["c", "d", "a"], return_index=False)
+    dl = local_ds.pytorch(num_workers=0, tensors=["c", "d", "a"], return_index=False)
 
     for i, batch in enumerate(dl):
         c1, d1, a1 = batch
@@ -340,9 +324,9 @@ def test_custom_tensor_order(ds):
         np.testing.assert_array_equal(a1, a2)
         np.testing.assert_array_equal(c1, c2)
         np.testing.assert_array_equal(d1, d2)
-        np.testing.assert_array_equal(a1[0], ds.a.numpy()[i])
-        np.testing.assert_array_equal(c1[0], ds.c.numpy()[i])
-        np.testing.assert_array_equal(d1[0], ds.d.numpy()[i])
+        np.testing.assert_array_equal(a1[0], local_ds.a.numpy()[i])
+        np.testing.assert_array_equal(c1[0], local_ds.c.numpy()[i])
+        np.testing.assert_array_equal(d1[0], local_ds.d.numpy()[i])
         batch = pickle.loads(pickle.dumps(batch))
         c1, d1, a1 = batch
         a2 = batch["a"]
@@ -351,11 +335,11 @@ def test_custom_tensor_order(ds):
         np.testing.assert_array_equal(a1, a2)
         np.testing.assert_array_equal(c1, c2)
         np.testing.assert_array_equal(d1, d2)
-        np.testing.assert_array_equal(a1[0], ds.a.numpy()[i])
-        np.testing.assert_array_equal(c1[0], ds.c.numpy()[i])
-        np.testing.assert_array_equal(d1[0], ds.d.numpy()[i])
+        np.testing.assert_array_equal(a1[0], local_ds.a.numpy()[i])
+        np.testing.assert_array_equal(c1[0], local_ds.c.numpy()[i])
+        np.testing.assert_array_equal(d1[0], local_ds.d.numpy()[i])
 
-    dls = ds.pytorch(num_workers=0, tensors=["c", "d", "a"], return_index=False)
+    dls = local_ds.pytorch(num_workers=0, tensors=["c", "d", "a"], return_index=False)
     for i, batch in enumerate(dls):
         c1, d1, a1 = batch
         a2 = batch["a"]
@@ -376,7 +360,6 @@ def test_custom_tensor_order(ds):
 
 
 @requires_torch
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_readonly_with_two_workers(local_ds):
     local_ds.create_tensor("images", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
     local_ds.create_tensor("labels", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
@@ -395,8 +378,6 @@ def test_readonly_with_two_workers(local_ds):
 
 
 @requires_torch
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
-@pytest.mark.slow
 def test_corrupt_dataset(local_ds, corrupt_image_paths, compressed_image_paths):
     img_good = deeplake.read(compressed_image_paths["jpeg"][0])
     img_bad = deeplake.read(corrupt_image_paths["jpeg"])
@@ -417,25 +398,22 @@ def test_corrupt_dataset(local_ds, corrupt_image_paths, compressed_image_paths):
 
 
 @requires_torch
-@enabled_non_gdrive_datasets
-@pytest.mark.slow
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
-def test_pytorch_local_cache(ds):
-    with ds:
-        ds.create_tensor("image", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
-        ds.image.extend(([i * np.ones((i + 1, i + 1)) for i in range(16)]))
-        ds.create_tensor("image2", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
-        ds.image2.extend(np.array([i * np.ones((12, 12)) for i in range(16)]))
+def test_pytorch_local_cache(local_ds):
+    with local_ds:
+        local_ds.create_tensor("image", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
+        local_ds.image.extend(([i * np.ones((i + 1, i + 1)) for i in range(16)]))
+        local_ds.create_tensor("image2", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
+        local_ds.image2.extend(np.array([i * np.ones((12, 12)) for i in range(16)]))
 
-    if isinstance(get_base_storage(ds.storage), MemoryProvider):
+    if isinstance(get_base_storage(local_ds.storage), MemoryProvider):
         with pytest.raises(DatasetUnsupportedPytorch):
-            dl = ds.pytorch()
+            dl = local_ds.pytorch(num_workers=0)
         return
 
     epochs = 2
 
     for _ in range(epochs):
-        dl = ds.pytorch(num_workers=1, batch_size=1, use_local_cache=True)
+        dl = local_ds.pytorch(num_workers=1, batch_size=1, use_local_cache=True)
         for i, batch in enumerate(dl):
             np.testing.assert_array_equal(
                 batch["image"].numpy(), i * np.ones((1, i + 1, i + 1))
@@ -444,7 +422,7 @@ def test_pytorch_local_cache(ds):
                 batch["image2"].numpy(), i * np.ones((1, 12, 12))
             )
 
-        dls = ds.pytorch(
+        dls = local_ds.pytorch(
             num_workers=2,
             batch_size=1,
             shuffle=True,
@@ -454,7 +432,6 @@ def test_pytorch_local_cache(ds):
 
 
 @requires_torch
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_groups(local_ds, compressed_image_paths):
     img1 = deeplake.read(compressed_image_paths["jpeg"][0])
     img2 = deeplake.read(compressed_image_paths["png"][0])
@@ -468,7 +445,7 @@ def test_groups(local_ds, compressed_image_paths):
         for _ in range(10):
             local_ds.images.jpegs.cats.append(img1)
             local_ds.images.pngs.flowers.append(img2)
-    dl = local_ds.pytorch(return_index=False)
+    dl = local_ds.pytorch(return_index=False, num_workers=0)
     for cat, flower in dl:
         np.testing.assert_array_equal(cat[0], img1.array)
         np.testing.assert_array_equal(flower[0], img2.array)
@@ -484,7 +461,7 @@ def test_groups(local_ds, compressed_image_paths):
             local_ds.arrays.x.append(np.random.random((2, 3)))
             local_ds.arrays.y.append(np.random.random((4, 5)))
 
-    dl = local_ds.images.pytorch(return_index=False)
+    dl = local_ds.images.pytorch(return_index=False, num_workers=0)
     for sample in dl:
         cat = sample["jpegs/cats"]
         flower = sample["pngs/flowers"]
@@ -493,7 +470,6 @@ def test_groups(local_ds, compressed_image_paths):
 
 
 @requires_torch
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_string_tensors(local_ds):
     with local_ds:
         local_ds.create_tensor("strings", htype="text")
@@ -510,7 +486,6 @@ def test_string_tensors(local_ds):
 
 @pytest.mark.slow
 @requires_torch
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_pytorch_large(local_ds):
     arr_list_1 = [np.random.randn(1500, 1500, i) for i in range(5)]
     arr_list_2 = [np.random.randn(400, 1500, 4, i) for i in range(5)]
@@ -524,7 +499,7 @@ def test_pytorch_large(local_ds):
         ds.img2.extend(arr_list_2)
         ds.label.extend(label_list)
 
-    ptds = local_ds.pytorch()
+    ptds = local_ds.pytorch(num_workers=0)
     for idx, batch in enumerate(ptds):
         np.testing.assert_array_equal(batch["img1"][0], arr_list_1[idx])
         np.testing.assert_array_equal(batch["img2"][0], arr_list_2[idx])
@@ -553,7 +528,6 @@ def view_tform(sample):
         (np.random.randint(0, 10, 100).tolist(), False),
     ],
 )
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_pytorch_view(local_ds, index, shuffle):
     arr_list_1 = [np.random.randn(15, 15, 5) for _ in range(10)]
     arr_list_2 = [np.random.randn(40, 15, 4, 2) for _ in range(10)]
@@ -567,7 +541,7 @@ def test_pytorch_view(local_ds, index, shuffle):
         ds.img2.extend(arr_list_2)
         ds.label.extend(label_list)
 
-    ptds = local_ds[index].pytorch(transform=view_tform, shuffle=shuffle)
+    ptds = local_ds[index].pytorch(transform=view_tform, shuffle=shuffle, num_workers=0)
     idxs = list(IndexEntry(index).indices(len(local_ds)))
     for _ in range(2):
         for idx, batch in enumerate(ptds):
@@ -577,7 +551,11 @@ def test_pytorch_view(local_ds, index, shuffle):
                 np.testing.assert_array_equal(batch["img2"][0], arr_list_2[idx])
                 np.testing.assert_array_equal(batch["label"][0], idx)
     ptds = local_ds[index].pytorch(
-        transform=view_tform, shuffle=shuffle, batch_size=2, drop_last=True
+        transform=view_tform,
+        shuffle=shuffle,
+        batch_size=2,
+        drop_last=True,
+        num_workers=0,
     )
     for _ in range(2):
         for batch in ptds:
@@ -588,7 +566,6 @@ def test_pytorch_view(local_ds, index, shuffle):
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
 @pytest.mark.parametrize("buffer_size", [0, 10])
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_pytorch_collate(local_ds, shuffle, buffer_size):
     local_ds.create_tensor("a")
     local_ds.create_tensor("b")
@@ -603,6 +580,7 @@ def test_pytorch_collate(local_ds, shuffle, buffer_size):
         shuffle=shuffle,
         collate_fn=reorder_collate,
         buffer_size=buffer_size,
+        num_workers=0,
     )
     for batch in ptds:
         assert len(batch) == 2
@@ -615,7 +593,6 @@ def test_pytorch_collate(local_ds, shuffle, buffer_size):
 @pytest.mark.slow
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_pytorch_transform_collate(local_ds, shuffle):
     local_ds.create_tensor("a")
     local_ds.create_tensor("b")
@@ -631,6 +608,7 @@ def test_pytorch_transform_collate(local_ds, shuffle):
         collate_fn=my_transform_collate,
         transform=dict_to_list,
         buffer_size=10,
+        num_workers=0,
     )
     for batch in ptds:
         assert len(batch) == 3
@@ -659,18 +637,16 @@ def run_ddp(rank, size, ds, q, backend="gloo"):
 @pytest.mark.slow
 @requires_torch
 @pytest.mark.slow
-@enabled_non_gdrive_datasets
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
-def test_pytorch_ddp(ds):
+def test_pytorch_ddp(local_ds):
     import multiprocessing as mp
 
-    with ds:
-        ds.create_tensor("image", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
-        ds.image.extend(np.array([i * np.ones((10, 10)) for i in range(255)]))
+    with local_ds:
+        local_ds.create_tensor("image", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
+        local_ds.image.extend(np.array([i * np.ones((10, 10)) for i in range(255)]))
 
-    if isinstance(get_base_storage(ds.storage), MemoryProvider):
+    if isinstance(get_base_storage(local_ds.storage), MemoryProvider):
         with pytest.raises(DatasetUnsupportedPytorch):
-            ds.pytorch()
+            local_ds.pytorch(num_workers=0)
         return
 
     size = 2
@@ -679,7 +655,7 @@ def test_pytorch_ddp(ds):
     q = ctx.Queue()
 
     for rank in range(size):
-        p = ctx.Process(target=run_ddp, args=(rank, size, ds, q), daemon=True)
+        p = ctx.Process(target=run_ddp, args=(rank, size, local_ds, q), daemon=True)
         p.start()
         processes.append(p)
 
@@ -700,22 +676,22 @@ def identity(x):
 
 @requires_torch
 @pytest.mark.slow
-@enabled_non_gdrive_datasets
 @pytest.mark.parametrize("compression", [None, "jpeg"])
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
-def test_pytorch_decode(ds, compressed_image_paths, compression):
-    with ds:
-        ds.create_tensor("image", sample_compression=compression)
-        ds.image.extend(
+def test_pytorch_decode(local_ds, compressed_image_paths, compression):
+    with local_ds:
+        local_ds.create_tensor("image", sample_compression=compression)
+        local_ds.image.extend(
             np.array([i * np.ones((10, 10, 3), dtype=np.uint8) for i in range(5)])
         )
-        ds.image.extend([deeplake.read(compressed_image_paths["jpeg"][0])] * 5)
-    if isinstance(get_base_storage(ds.storage), MemoryProvider):
+        local_ds.image.extend([deeplake.read(compressed_image_paths["jpeg"][0])] * 5)
+    if isinstance(get_base_storage(local_ds.storage), MemoryProvider):
         with pytest.raises(DatasetUnsupportedPytorch):
-            ds.pytorch()
+            local_ds.pytorch(num_workers=0)
         return
 
-    for i, batch in enumerate(ds.pytorch(decode_method={"image": "tobytes"})):
+    for i, batch in enumerate(
+        local_ds.pytorch(decode_method={"image": "tobytes"}, num_workers=0)
+    ):
         image = convert_data_according_to_torch_version(batch["image"])
         assert isinstance(image, bytes)
         if i < 5 and not compression:
@@ -728,7 +704,9 @@ def test_pytorch_decode(ds, compressed_image_paths, compression):
                 assert f.read() == image
 
     if compression:
-        ptds = ds.pytorch(decode_method={"image": "pil"}, collate_fn=identity)
+        ptds = local_ds.pytorch(
+            decode_method={"image": "pil"}, collate_fn=identity, num_workers=0
+        )
         for i, batch in enumerate(ptds):
             image = batch[0]["image"]
             assert isinstance(image, Image.Image)
@@ -742,7 +720,6 @@ def test_pytorch_decode(ds, compressed_image_paths, compression):
 
 
 @requires_torch
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_pytorch_decode_multi_worker_shuffle(local_ds, compressed_image_paths):
     with local_ds as ds:
         ds.create_tensor("image", sample_compression="jpeg")
@@ -771,7 +748,6 @@ def test_pytorch_decode_multi_worker_shuffle(local_ds, compressed_image_paths):
 
 
 @requires_torch
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_rename(local_ds):
     with local_ds as ds:
         ds.create_tensor("abc")
@@ -780,7 +756,7 @@ def test_rename(local_ds):
         ds.rename_tensor("abc", "xyz")
         ds.rename_group("blue", "red")
         ds["red/green"].append([1, 2, 3, 4])
-        loader = ds.pytorch(return_index=False)
+        loader = ds.pytorch(return_index=False, num_workers=0)
         for sample in loader:
             assert set(sample.keys()) == {"xyz", "red/green"}
             np.testing.assert_array_equal(
@@ -794,7 +770,6 @@ def test_rename(local_ds):
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
 @pytest.mark.parametrize("num_workers", [0, 2])
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_indexes(local_ds, shuffle, num_workers):
     with local_ds as ds:
         ds.create_tensor("xyz")
@@ -818,7 +793,6 @@ def index_transform(sample):
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
 @pytest.mark.parametrize("num_workers", [0, 2])
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_indexes_transform(local_ds, shuffle, num_workers):
     with local_ds as ds:
         ds.create_tensor("xyz")
@@ -845,7 +819,6 @@ def test_indexes_transform(local_ds, shuffle, num_workers):
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
 @pytest.mark.parametrize("num_workers", [0, 2])
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_indexes_transform_dict(local_ds, shuffle, num_workers):
     with local_ds as ds:
         ds.create_tensor("xyz")
@@ -880,7 +853,6 @@ def test_indexes_transform_dict(local_ds, shuffle, num_workers):
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
 @pytest.mark.parametrize("num_workers", [0, 2])
-@pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_indexes_tensors(local_ds, shuffle, num_workers):
     with local_ds as ds:
         ds.create_tensor("xyz")
@@ -892,6 +864,7 @@ def test_indexes_tensors(local_ds, shuffle, num_workers):
             return_index=True,
             shuffle=shuffle,
             tensors=["xyz", "index"],
+            num_workers=0,
         )
 
     ptds = local_ds.pytorch(
@@ -912,7 +885,7 @@ def test_uneven_iteration(local_ds):
         ds.create_tensor("y")
         ds.x.extend(list(range(10)))
         ds.y.extend(list(range(5)))
-        ptds = ds.pytorch()
+        ptds = ds.pytorch(num_workers=0)
         for i, batch in enumerate(ptds):
             x, y = np.array(batch["x"][0]), np.array(batch["y"][0])
             np.testing.assert_equal(x, i)
@@ -949,11 +922,11 @@ def test_pytorch_json(local_ds):
         ds.a.append({"x": 1})
         ds.a.append({"x": 2})
 
-    ptds = ds.pytorch(transform={"a": json_transform_fn}, batch_size=2)
+    ptds = ds.pytorch(transform={"a": json_transform_fn}, batch_size=2, num_workers=0)
     batch = next(iter(ptds))
     np.testing.assert_equal(batch["a"], np.array([1, 2]))
 
-    ptds = ds.pytorch(collate_fn=json_collate_fn, batch_size=2)
+    ptds = ds.pytorch(collate_fn=json_collate_fn, batch_size=2, num_workers=0)
     batch = next(iter(ptds))
     np.testing.assert_equal(batch, np.array([1, 2]))
 
@@ -965,11 +938,11 @@ def test_pytorch_list(local_ds):
         ds.a.append([1, 2])
         ds.a.append([3, 4])
 
-    ptds = ds.pytorch(transform={"a": list_transform_fn}, batch_size=2)
+    ptds = ds.pytorch(transform={"a": list_transform_fn}, batch_size=2, num_workers=0)
     batch = next(iter(ptds))
     np.testing.assert_equal(batch["a"], np.array([[1, 2], [3, 4]]))
 
-    ptds = ds.pytorch(collate_fn=list_collate_fn, batch_size=2)
+    ptds = ds.pytorch(collate_fn=list_collate_fn, batch_size=2, num_workers=0)
     batch = next(iter(ptds))
     np.testing.assert_equal(batch, np.array([[1, 2], [3, 4]]))
 

@@ -1,5 +1,7 @@
+import faulthandler
 import os
 import logging
+import signal
 
 # Disable crash reporting before running tests
 # This MUST come before hub imports to bypass import publication.
@@ -99,3 +101,7 @@ def gc_lock_threads():
     for k in end_keys - start_keys:
         _LOCKS.pop(k).release()
         del _REFS[k]
+
+def pytest_sessionstart(session):
+    print("Tests received SIGKILL", file=sys.stderr)
+    faulthandler.register(signal.SIGKILL)
