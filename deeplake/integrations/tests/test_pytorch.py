@@ -382,6 +382,7 @@ def test_readonly_with_two_workers(local_ds):
 
 @requires_torch
 def test_corrupt_dataset(local_ds, corrupt_image_paths, compressed_image_paths):
+    local_ds.storage.clear()
     img_good = deeplake.read(compressed_image_paths["jpeg"][0])
     img_bad = deeplake.read(corrupt_image_paths["jpeg"])
     with local_ds:
