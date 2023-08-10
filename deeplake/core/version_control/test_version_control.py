@@ -2440,6 +2440,7 @@ def test_version_in_path(local_path):
         deeplake.exists(f"{local_path}@main")
 
 
+@pytest.mark.slow
 def test_branch_delete(local_ds_generator):
     local_ds = local_ds_generator()
     local_ds.create_tensor("test")

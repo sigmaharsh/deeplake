@@ -1111,7 +1111,7 @@ def test_transform_info(local_ds_generator):
 @all_compressions
 @pytest.mark.parametrize(
     "ds",
-    ["memory_ds", "local_ds", "s3_ds"],
+    ["memory_ds", "local_ds", pytest.param("s3_ds", marks=pytest.mark.slow)],
     indirect=True,
 )
 def test_read_only_dataset_aggregation_image(ds, sample_compression, num_workers):
@@ -1169,7 +1169,7 @@ def test_read_only_dataset_aggregation_label(ds, num_workers):
 @all_schedulers
 @pytest.mark.parametrize(
     "ds",
-    ["local_ds", "s3_ds"],
+    ["local_ds", pytest.param("s3_ds", marks=pytest.mark.slow)],
     indirect=True,
 )
 def test_read_only_dataset_raise(ds, scheduler, num_workers):

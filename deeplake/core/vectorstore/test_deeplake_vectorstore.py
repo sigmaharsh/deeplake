@@ -179,6 +179,7 @@ def test_custom_tensors(local_path):
     ],
     indirect=True,
 )
+@pytest.mark.slow
 def test_providers(path, hub_token):
     vector_store = DeepLakeVectorStore(
         path=path,
@@ -197,6 +198,7 @@ def test_providers(path, hub_token):
     assert len(vector_store) == 10
 
 
+@pytest.mark.slow
 def test_creds(gcs_path, gcs_creds):
     # testing create dataset with creds
     vector_store = DeepLakeVectorStore(

@@ -1957,6 +1957,7 @@ def test_pyav_not_installed(local_ds, video_paths):
     deeplake.core.compression._PYAV_INSTALLED = pyav_installed
 
 
+@pytest.mark.slow
 def test_partial_read_then_write(s3_ds_generator):
     ds = s3_ds_generator()
     with ds:

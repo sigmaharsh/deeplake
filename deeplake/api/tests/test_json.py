@@ -195,6 +195,7 @@ def test_json_with_schema(memory_ds):
 
 @enabled_non_gcs_datasets
 @pytest.mark.parametrize("compression", ["lz4", None])
+@pytest.mark.slow
 def test_json_transform(ds, compression, scheduler="threaded"):
     ds.create_tensor("json", htype="json", sample_compression=compression)
 

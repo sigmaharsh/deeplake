@@ -273,6 +273,7 @@ def test_pytorch_transform_dict(ds):
 
 @requires_torch
 @enabled_non_gdrive_datasets
+@pytest.mark.slow
 @pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
 def test_pytorch_with_compression(ds: Dataset):
     # TODO: chunk-wise compression for labels (right now they are uncompressed)
@@ -698,6 +699,7 @@ def identity(x):
 
 
 @requires_torch
+@pytest.mark.slow
 @enabled_non_gdrive_datasets
 @pytest.mark.parametrize("compression", [None, "jpeg"])
 @pytest.mark.skipif(sys.platform == "darwin", reason="Tests are unstable on macos")
