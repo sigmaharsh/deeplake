@@ -102,6 +102,6 @@ def gc_lock_threads():
         _LOCKS.pop(k).release()
         del _REFS[k]
 
-def pytest_sessionstart(session):
-    print("Tests received SIGTERM", file=sys.stderr)
-    faulthandler.register(signal.SIGTERM)
+# def pytest_sessionstart(session):
+#     print("Tests received SIGTERM", file=sys.stderr)
+#     faulthandler.register(signal.SIGTERM)
