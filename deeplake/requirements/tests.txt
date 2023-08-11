@@ -4,6 +4,7 @@ pytest-benchmark
 pytest-cov
 pytest-timeout
 pytest-rerunfailures
+pytest-profiling
 coverage
 
 mypy
