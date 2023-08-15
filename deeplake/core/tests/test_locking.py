@@ -43,7 +43,7 @@ class VM(object):
 def test_dataset_locking(ds_generator):
     deeplake.constants.LOCK_LOCAL_DATASETS = True
     try:
-        ds = ds_generator()
+        ds = ds_generator(lock_enabled=True)
         ds.create_tensor("x")
         arr = np.random.random((32, 32))
         ds.x.append(arr)
@@ -51,17 +51,17 @@ def test_dataset_locking(ds_generator):
         with VM():
             # Make sure read only warning is raised
             with pytest.warns(UserWarning):
-                ds = ds_generator()
+                ds = ds_generator(lock_enabled=True)
                 np.testing.assert_array_equal(arr, ds.x[0].numpy())
             assert ds.read_only == True
             with pytest.raises(LockedException):
                 ds.read_only = False
             # Raise error if user explicitly asks for write access
             with pytest.raises(LockedException):
-                ds = ds_generator(read_only=False)
+                ds = ds_generator(read_only=False, lock_enabled=True)
             # No warnings if user requests read only mode
             with warnings.catch_warnings(record=True) as ws:
-                ds = ds_generator(read_only=True)
+                ds = ds_generator(read_only=True, lock_enabled=True)
                 np.testing.assert_array_equal(arr, ds.x[0].numpy())
             assert not ws
     finally:
@@ -74,7 +74,7 @@ def test_dataset_locking(ds_generator):
 def test_vc_locking(ds_generator):
     deeplake.constants.LOCK_LOCAL_DATASETS = True
     try:
-        ds = ds_generator()
+        ds = ds_generator(lock_enabled=True)
         ds.create_tensor("x")
         arr = np.random.random((32, 32))
         ds.x.append(arr)
@@ -82,7 +82,7 @@ def test_vc_locking(ds_generator):
         ds.checkout("branch", create=True)
         with VM():
             with warnings.catch_warnings(record=True) as ws:
-                ds = ds_generator()
+                ds = ds_generator(lock_enabled=True)
             np.testing.assert_array_equal(arr, ds.x[0].numpy())
             assert not ws, str(ws[0])
     finally:
@@ -99,7 +99,7 @@ def test_lock_thread_leaking(s3_ds_generator):
         assert len(locks) == len(refs)
         return len(locks) - nlocks_previous
 
-    ds = s3_ds_generator()
+    ds = s3_ds_generator(lock_enabled=True)
     ds.create_tensor("a")
     assert nlocks() == 1
 
@@ -107,7 +107,7 @@ def test_lock_thread_leaking(s3_ds_generator):
     del ds
     assert nlocks() == 0
 
-    ds = s3_ds_generator()
+    ds = s3_ds_generator(lock_enabled=True)
     ds.create_tensor("x")
     ds.x.extend(np.random.random((2, 32)))
     views = []

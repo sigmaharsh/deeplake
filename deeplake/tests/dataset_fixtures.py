@@ -77,6 +77,9 @@ def local_auth_ds(local_auth_ds_generator):
 @pytest.fixture
 def local_ds_generator(local_path):
     def generate_local_ds(**kwargs):
+        if kwargs.get("lock_enabled") is None:
+            kwargs["lock_enabled"] = False
+
         return deeplake.dataset(local_path, **kwargs)
 
     return generate_local_ds
@@ -85,6 +88,9 @@ def local_ds_generator(local_path):
 @pytest.fixture
 def local_auth_ds_generator(local_path, hub_cloud_dev_token):
     def generate_local_auth_ds(**kwargs):
+        if kwargs.get("lock_enabled") is None:
+            kwargs["lock_enabled"] = False
+
         return deeplake.dataset(local_path, token=hub_cloud_dev_token, **kwargs)
 
     return generate_local_auth_ds
@@ -98,6 +104,9 @@ def s3_ds(s3_ds_generator):
 @pytest.fixture
 def s3_ds_generator(s3_path):
     def generate_s3_ds(**kwargs):
+        if kwargs.get("lock_enabled") is None:
+            kwargs["lock_enabled"] = False
+
         return deeplake.dataset(s3_path, **kwargs)
 
     return generate_s3_ds
@@ -110,8 +119,11 @@ def gdrive_ds(gdrive_ds_generator):
 
 @pytest.fixture
 def gdrive_ds_generator(gdrive_path, gdrive_creds):
-    def generate_gdrive_ds():
-        return deeplake.dataset(gdrive_path, creds=gdrive_creds)
+    def generate_gdrive_ds(**kwargs):
+        if kwargs.get("lock_enabled") is None:
+            kwargs["lock_enabled"] = False
+
+        return deeplake.dataset(gdrive_path, creds=gdrive_creds, **kwargs)
 
     return generate_gdrive_ds
 
@@ -124,6 +136,9 @@ def gcs_ds(gcs_ds_generator):
 @pytest.fixture
 def gcs_ds_generator(gcs_path, gcs_creds):
     def generate_gcs_ds(**kwargs):
+        if kwargs.get("lock_enabled") is None:
+            kwargs["lock_enabled"] = False
+
         return deeplake.dataset(gcs_path, creds=gcs_creds, **kwargs)
 
     return generate_gcs_ds
@@ -137,6 +152,9 @@ def azure_ds(azure_ds_generator):
 @pytest.fixture
 def azure_ds_generator(azure_path):
     def generate_azure_ds(**kwargs):
+        if kwargs.get("lock_enabled") is None:
+            kwargs["lock_enabled"] = False
+
         return deeplake.dataset(azure_path, **kwargs)
 
     return generate_azure_ds
@@ -150,6 +168,9 @@ def hub_cloud_ds(hub_cloud_ds_generator):
 @pytest.fixture
 def hub_cloud_ds_generator(hub_cloud_path, hub_cloud_dev_token):
     def generate_hub_cloud_ds(**kwargs):
+        if kwargs.get("lock_enabled") is None:
+            kwargs["lock_enabled"] = False
+
         return deeplake.dataset(hub_cloud_path, token=hub_cloud_dev_token, **kwargs)
 
     return generate_hub_cloud_ds
@@ -158,6 +179,9 @@ def hub_cloud_ds_generator(hub_cloud_path, hub_cloud_dev_token):
 @pytest.fixture
 def hub_cloud_gcs_ds_generator(gcs_path, gcs_creds, hub_cloud_dev_token):
     def generate_hub_cloud_gcs_ds(**kwargs):
+        if kwargs.get("lock_enabled") is None:
+            kwargs["lock_enabled"] = False
+
         ds = deeplake.dataset(gcs_path, creds=gcs_creds, **kwargs)
         ds.connect(
             org_id=HUB_CLOUD_DEV_USERNAME,
