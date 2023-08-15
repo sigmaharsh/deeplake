@@ -1,5 +1,7 @@
 import os
 
+from deeplake import constants
+
 import deeplake
 import pathlib
 import posixpath
@@ -1101,7 +1103,7 @@ class dataset:
         token=None,
         num_workers: int = 0,
         scheduler="threaded",
-        progressbar=True,
+        progressbar=constants.PROGRESSBAR_ENABLED_DEFAULT,
         public: bool = False,
         verbose: bool = True,
         **kwargs,
@@ -1402,7 +1404,7 @@ class dataset:
         src_creds: Optional[Union[str, Dict]] = None,
         dest_creds: Optional[Union[str, Dict]] = None,
         inspect_limit: int = 1000000,
-        progressbar: bool = True,
+        progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
         shuffle: bool = False,
         num_workers: int = 0,
         token: Optional[str] = None,
@@ -1524,7 +1526,7 @@ class dataset:
         dest_creds: Optional[Union[str, Dict]] = None,
         image_creds_key: Optional[str] = None,
         inspect_limit: int = 1000,
-        progressbar: bool = True,
+        progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
         shuffle: bool = False,
         num_workers: int = 0,
         token: Optional[str] = None,
@@ -1648,7 +1650,7 @@ class dataset:
         image_params: Optional[Dict] = None,
         label_params: Optional[Dict] = None,
         dest_creds: Optional[Union[str, Dict]] = None,
-        progressbar: bool = True,
+        progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
         summary: bool = True,
         num_workers: int = 0,
         shuffle: bool = True,
@@ -1805,7 +1807,7 @@ class dataset:
         images_compression: str = "auto",
         dest_creds: Optional[Union[str, Dict]] = None,
         kaggle_credentials: Optional[dict] = None,
-        progressbar: bool = True,
+        progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
         summary: bool = True,
         shuffle: bool = True,
         **dataset_kwargs,
@@ -1885,7 +1887,7 @@ class dataset:
         src_creds: Optional[Union[str, Dict]] = None,
         dest_creds: Optional[Union[str, Dict]] = None,
         creds_key: Optional[Dict] = None,
-        progressbar: bool = True,
+        progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
         token: Optional[str] = None,
         connect_kwargs: Optional[Dict] = None,
         **dataset_kwargs,

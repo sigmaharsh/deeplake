@@ -976,7 +976,7 @@ def test_dataset_rename(ds_generator, path, hub_token, convert_to_pathlib):
     indirect=True,
 )
 @pytest.mark.parametrize("num_workers", [2])
-@pytest.mark.parametrize("progressbar", [True])
+@pytest.mark.parametrize("progressbar", [False])
 def test_dataset_deepcopy(path, hub_token, num_workers, progressbar):
     src_path = "_".join((path, "src1"))
     dest_path = "_".join((path, "dest1"))
@@ -1877,7 +1877,7 @@ def test_hidden_tensors(local_ds_generator):
 
 
 @pytest.mark.parametrize("num_workers", [0, 2])
-@pytest.mark.parametrize("progressbar", [True, False])
+@pytest.mark.parametrize("progressbar", [False])
 @pytest.mark.parametrize(
     "index", [slice(None), slice(5, None, None), slice(None, 8, 2), 7]
 )

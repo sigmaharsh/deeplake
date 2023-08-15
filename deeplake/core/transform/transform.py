@@ -1,4 +1,7 @@
 from uuid import uuid4
+
+from deeplake import constants
+
 import deeplake
 from typing import Callable, List, Optional
 from itertools import repeat
@@ -57,7 +60,7 @@ class ComputeFunction:
         ds_out: Optional[deeplake.Dataset] = None,
         num_workers: int = 0,
         scheduler: str = "threaded",
-        progressbar: bool = True,
+        progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
         skip_ok: bool = False,
         check_lengths: bool = True,
         pad_data_in: bool = False,
@@ -135,7 +138,7 @@ class Pipeline:
         ds_out: Optional[deeplake.Dataset] = None,
         num_workers: int = 0,
         scheduler: str = "threaded",
-        progressbar: bool = True,
+        progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
         skip_ok: bool = False,
         check_lengths: bool = True,
         pad_data_in: bool = False,
@@ -340,7 +343,7 @@ class Pipeline:
         compute: ComputeProvider,
         num_workers: int,
         scheduler: str,
-        progressbar: bool = True,
+        progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
         overwrite: bool = False,
         skip_ok: bool = False,
         read_only: bool = False,

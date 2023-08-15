@@ -10,6 +10,8 @@ from functools import partial
 import pathlib
 import numpy as np
 from time import time, sleep
+
+from deeplake import constants
 from tqdm import tqdm  # type: ignore
 
 import deeplake
@@ -2167,7 +2169,7 @@ class Dataset:
         function: Union[Callable, str],
         num_workers: int = 0,
         scheduler: str = "threaded",
-        progressbar: bool = True,
+        progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
         save_result: bool = False,
         result_path: Optional[str] = None,
         result_ds_args: Optional[dict] = None,
@@ -2874,7 +2876,7 @@ class Dataset:
         tensors: Optional[Union[str, List[str]]] = None,
         num_workers: int = 0,
         scheduler: str = "threaded",
-        progressbar: bool = True,
+        progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
     ):
         """Rewrites the underlying chunks to make their sizes optimal.
         This is usually needed in cases where a lot of updates have been made to the data.
@@ -3752,7 +3754,7 @@ class Dataset:
         tensors: Optional[List[str]] = None,
         num_workers: int = 0,
         scheduler: str = "threaded",
-        progressbar: Optional[bool] = True,
+        progressbar: Optional[bool] = constants.PROGRESSBAR_ENABLED_DEFAULT,
     ):
         """Loads the view and returns the :class:`~deeplake.core.dataset.dataset.Dataset` by id. Equivalent to ds.get_view(id).load().
 

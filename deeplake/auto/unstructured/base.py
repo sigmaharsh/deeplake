@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+
+from deeplake import constants
+
 from deeplake.util.path import find_root
 from pathlib import Path
 
@@ -14,5 +17,7 @@ class UnstructuredDataset(ABC):
     """
 
     @abstractmethod
-    def structure(ds, progressbar: bool = True, **kwargs):
+    def structure(
+        ds, progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT, **kwargs
+    ):
         pass

@@ -3,6 +3,7 @@ import deeplake
 from pathlib import Path
 from typing import List, Union, Dict, Optional
 from itertools import chain
+from deeplake import constants
 
 from deeplake.core.dataset import Dataset
 from deeplake.core.tensor import Tensor
@@ -139,7 +140,7 @@ class CocoDataset(UnstructuredDataset):
         self._structure = structure
         return structure
 
-    def structure(self, ds: Dataset, progressbar: bool = True, num_workers: int = 0, shuffle: bool = True):  # type: ignore
+    def structure(self, ds: Dataset, progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT, num_workers: int = 0, shuffle: bool = True):  # type: ignore
         image_files = self.images.supported_images
 
         if shuffle:

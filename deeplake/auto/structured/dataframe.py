@@ -1,6 +1,6 @@
 import numpy as np
 from .base import StructuredDataset
-from deeplake import Dataset
+from deeplake import Dataset, constants
 from deeplake import read, link
 from deeplake.htype import HTYPE_SUPPORTED_COMPRESSIONS
 from deeplake.util.exceptions import IngestionError
@@ -146,7 +146,9 @@ class DataFrame(StructuredDataset):
 
         return extend_values
 
-    def fill_dataset(self, ds: Dataset, progressbar: bool = True) -> Dataset:
+    def fill_dataset(
+        self, ds: Dataset, progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT
+    ) -> Dataset:
         """Fill dataset with data from the dataframe - one tensor per column
 
         Args:

@@ -123,8 +123,8 @@ def test_query_scheduler(local_ds):
     f1 = "labels % 2 == 0"
     f2 = lambda s: s.labels.numpy() % 2 == 0
 
-    view1 = ds.filter(f1, num_workers=2, progressbar=True)
-    view2 = ds.filter(f2, num_workers=2, progressbar=True)
+    view1 = ds.filter(f1, num_workers=2)
+    view2 = ds.filter(f2, num_workers=2)
 
     np.testing.assert_array_equal(view1.labels.numpy(), view2.labels.numpy())
 

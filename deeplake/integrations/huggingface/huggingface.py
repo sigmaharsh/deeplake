@@ -1,5 +1,8 @@
 import pathlib
 from typing import Dict, Set
+
+from deeplake import constants
+
 from deeplake.core.dataset import Dataset
 import posixpath
 import deeplake
@@ -69,7 +72,7 @@ def _create_tensor_from_feature(key, feature, src, ds):
 def ingest_huggingface(
     src,
     dest,
-    use_progressbar=True,
+    use_progressbar=constants.PROGRESSBAR_ENABLED_DEFAULT,
     token: Optional[str] = None,
     connect_kwargs: Optional[Dict] = None,
     **dataset_kwargs,

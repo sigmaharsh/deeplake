@@ -1089,7 +1089,6 @@ def test_ingestion(local_path, capsys):
     vector_store = DeepLakeVectorStore(
         path=local_path,
         overwrite=True,
-        verbose=True,
     )
 
     with pytest.raises(Exception):
@@ -1210,7 +1209,6 @@ def test_ingestion_images(local_path):
         path=local_path,
         tensor_params=tensor_params,
         overwrite=True,
-        verbose=True,
     )
 
     ids = vector_store.add(image=images, embedding=embeddings, return_ids=True)

@@ -5,6 +5,8 @@ import os
 import glob
 from typing import List, Tuple, Union
 
+from deeplake import constants
+
 from deeplake.util.auto import ingestion_summary
 from deeplake.util.exceptions import (
     InvalidPathException,
@@ -92,7 +94,7 @@ class ImageClassification(UnstructuredDataset):
     def structure(  # type: ignore
         self,
         ds: Dataset,
-        progressbar: bool = True,
+        progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
         generate_summary: bool = True,
         shuffle: bool = True,
         image_tensor_args: dict = {},

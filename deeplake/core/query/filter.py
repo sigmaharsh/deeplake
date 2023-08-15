@@ -1,6 +1,8 @@
 from typing import Callable, List, Optional, Sequence, Dict
 from uuid import uuid4
 
+from deeplake import constants
+
 import deeplake
 
 from deeplake.core.io import SampleStreaming
@@ -64,7 +66,7 @@ def filter_dataset(
     filter_function: Callable[[deeplake.Dataset], bool],
     num_workers: int = 0,
     scheduler: str = "threaded",
-    progressbar: bool = True,
+    progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
     save_result: bool = False,
     result_path: Optional[str] = None,
     result_ds_args: Optional[dict] = None,
@@ -155,7 +157,7 @@ def filter_with_compute(
     filter_function: Callable,
     num_workers: int,
     scheduler: str,
-    progressbar: bool = True,
+    progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
     query_text: Optional[str] = None,
     vds: Optional[deeplake.Dataset] = None,
 ) -> List[int]:
@@ -346,7 +348,7 @@ def query_dataset(
     query: str,
     num_workers: int = 0,
     scheduler: str = "threaded",
-    progressbar: bool = True,
+    progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
     save_result: bool = False,
     result_path: Optional[str] = None,
     result_ds_args: Optional[Dict] = None,

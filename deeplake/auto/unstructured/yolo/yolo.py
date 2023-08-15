@@ -1,3 +1,5 @@
+from deeplake import constants
+
 import deeplake
 
 from pathlib import Path
@@ -218,7 +220,12 @@ class YoloDataset(UnstructuredDataset):
             )
         )
 
-    def _ingest_data(self, ds: Dataset, progressbar: bool = True, num_workers: int = 0):
+    def _ingest_data(
+        self,
+        ds: Dataset,
+        progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT,
+        num_workers: int = 0,
+    ):
         """Functions appends the the data to the dataset object using deeplake.compute"""
 
         if self.image_creds_key is not None:
@@ -298,7 +305,7 @@ class YoloDataset(UnstructuredDataset):
                 num_workers=num_workers,
             )
 
-    def structure(self, ds: Dataset, progressbar: bool = True, num_workers: int = 0, shuffle: bool = True):  # type: ignore
+    def structure(self, ds: Dataset, progressbar: bool = constants.PROGRESSBAR_ENABLED_DEFAULT, num_workers: int = 0, shuffle: bool = True):  # type: ignore
         # Set class names in the dataset
         if self.data.class_names:
             ds[self.label_params["name"]].info["class_names"] = self.data.class_names
