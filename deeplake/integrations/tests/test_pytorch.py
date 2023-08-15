@@ -147,6 +147,7 @@ def test_pytorch_small(local_ds):
 @requires_torch
 def test_pytorch_transform(local_ds):
     import torch
+
     ds = local_ds
 
     with ds:
@@ -397,8 +398,8 @@ def test_corrupt_dataset(local_ds, corrupt_image_paths, compressed_image_paths):
     for (batch,) in dl:
         num_batches += 1
         num_samples += len(batch)
-    #TODO: Why Changed? assert num_samples == 30
-    #TODO: Why Changed? assert num_batches == 15
+    # TODO: Why Changed? assert num_samples == 30
+    # TODO: Why Changed? assert num_batches == 15
 
 
 @requires_torch

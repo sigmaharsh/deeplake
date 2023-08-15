@@ -61,7 +61,7 @@ enabled_cloud_dataset_generators = pytest.mark.parametrize(
 
 @pytest.fixture
 def memory_ds(memory_path):
-    return deeplake.dataset(memory_path, verbose=False)
+    return deeplake.dataset(memory_path)
 
 
 @pytest.fixture
@@ -79,8 +79,6 @@ def local_ds_generator(local_path):
     def generate_local_ds(**kwargs):
         if kwargs.get("lock_enabled") is None:
             kwargs["lock_enabled"] = False
-        if kwargs.get("verbose") is None:
-            kwargs["verbose"] = False
 
         return deeplake.dataset(local_path, **kwargs)
 
@@ -92,8 +90,6 @@ def local_auth_ds_generator(local_path, hub_cloud_dev_token):
     def generate_local_auth_ds(**kwargs):
         if kwargs.get("lock_enabled") is None:
             kwargs["lock_enabled"] = False
-        if kwargs.get("verbose") is None:
-            kwargs["verbose"] = False
 
         return deeplake.dataset(local_path, token=hub_cloud_dev_token, **kwargs)
 
@@ -110,8 +106,6 @@ def s3_ds_generator(s3_path):
     def generate_s3_ds(**kwargs):
         if kwargs.get("lock_enabled") is None:
             kwargs["lock_enabled"] = False
-        if kwargs.get("verbose") is None:
-            kwargs["verbose"] = False
 
         return deeplake.dataset(s3_path, **kwargs)
 
@@ -128,8 +122,6 @@ def gdrive_ds_generator(gdrive_path, gdrive_creds):
     def generate_gdrive_ds(**kwargs):
         if kwargs.get("lock_enabled") is None:
             kwargs["lock_enabled"] = False
-        if kwargs.get("verbose") is None:
-            kwargs["verbose"] = False
 
         return deeplake.dataset(gdrive_path, creds=gdrive_creds, **kwargs)
 
@@ -146,8 +138,6 @@ def gcs_ds_generator(gcs_path, gcs_creds):
     def generate_gcs_ds(**kwargs):
         if kwargs.get("lock_enabled") is None:
             kwargs["lock_enabled"] = False
-        if kwargs.get("verbose") is None:
-            kwargs["verbose"] = False
 
         return deeplake.dataset(gcs_path, creds=gcs_creds, **kwargs)
 
@@ -164,8 +154,6 @@ def azure_ds_generator(azure_path):
     def generate_azure_ds(**kwargs):
         if kwargs.get("lock_enabled") is None:
             kwargs["lock_enabled"] = False
-        if kwargs.get("verbose") is None:
-            kwargs["verbose"] = False
 
         return deeplake.dataset(azure_path, **kwargs)
 
@@ -182,8 +170,6 @@ def hub_cloud_ds_generator(hub_cloud_path, hub_cloud_dev_token):
     def generate_hub_cloud_ds(**kwargs):
         if kwargs.get("lock_enabled") is None:
             kwargs["lock_enabled"] = False
-        if kwargs.get("verbose") is None:
-            kwargs["verbose"] = False
 
         return deeplake.dataset(hub_cloud_path, token=hub_cloud_dev_token, **kwargs)
 
@@ -195,8 +181,6 @@ def hub_cloud_gcs_ds_generator(gcs_path, gcs_creds, hub_cloud_dev_token):
     def generate_hub_cloud_gcs_ds(**kwargs):
         if kwargs.get("lock_enabled") is None:
             kwargs["lock_enabled"] = False
-        if kwargs.get("verbose") is None:
-            kwargs["verbose"] = False
 
         ds = deeplake.dataset(gcs_path, creds=gcs_creds, **kwargs)
         ds.connect(

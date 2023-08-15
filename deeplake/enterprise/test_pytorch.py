@@ -133,9 +133,7 @@ def test_pytorch_transform(local_auth_ds):
         ds.create_tensor("image", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
         ds.image.extend(([i * np.ones((i + 1, i + 1)) for i in range(16)]))
         ds.checkout("alt", create=True)
-        ds.create_tensor(
-            "image2", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE
-        )
+        ds.create_tensor("image2", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
         ds.image2.extend(np.array([i * np.ones((12, 12)) for i in range(16)]))
 
     dl = (
@@ -174,17 +172,15 @@ def test_pytorch_transform_dict(local_auth_ds):
     with ds:
         ds.create_tensor("image", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
         ds.image.extend(([i * np.ones((i + 1, i + 1)) for i in range(16)]))
-        ds.create_tensor(
-            "image2", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE
-        )
+        ds.create_tensor("image2", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
         ds.image2.extend(np.array([i * np.ones((12, 12)) for i in range(16)]))
-        ds.create_tensor(
-            "image3", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE
-        )
+        ds.create_tensor("image3", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
         ds.image3.extend(np.array([i * np.ones((12, 12)) for i in range(16)]))
 
     dl = (
-        ds.dataloader().transform({"image": double, "image2": None}).pytorch(num_workers=0)
+        ds.dataloader()
+        .transform({"image": double, "image2": None})
+        .pytorch(num_workers=0)
     )
 
     assert len(dl.dataset) == 16
@@ -251,7 +247,9 @@ def test_custom_tensor_order(local_auth_ds):
     with pytest.raises(TensorDoesNotExistError):
         dl = ds.dataloader().pytorch(tensors=["c", "d", "e"], num_workers=0)
 
-    dl = ds.dataloader().pytorch(tensors=["c", "d", "a"], return_index=False, num_workers=0)
+    dl = ds.dataloader().pytorch(
+        tensors=["c", "d", "a"], return_index=False, num_workers=0
+    )
 
     for i, batch in enumerate(dl):
         c1, d1, a1 = batch
@@ -284,12 +282,8 @@ def test_custom_tensor_order(local_auth_ds):
 def test_readonly_with_two_workers(local_auth_ds):
     ds = local_auth_ds
     with ds:
-        ds.create_tensor(
-            "images", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE
-        )
-        ds.create_tensor(
-            "labels", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE
-        )
+        ds.create_tensor("images", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
+        ds.create_tensor("labels", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
         ds.images.extend(np.ones((10, 12, 12)))
         ds.labels.extend(np.ones(10))
 
@@ -327,17 +321,16 @@ def test_groups(local_auth_ds, compressed_image_paths):
     img1 = deeplake.read(compressed_image_paths["jpeg"][0])
     img2 = deeplake.read(compressed_image_paths["png"][0])
     with ds:
-        ds.create_tensor(
-            "images/jpegs/cats", htype="image", sample_compression="jpeg"
-        )
-        ds.create_tensor(
-            "images/pngs/flowers", htype="image", sample_compression="png"
-        )
+        ds.create_tensor("images/jpegs/cats", htype="image", sample_compression="jpeg")
+        ds.create_tensor("images/pngs/flowers", htype="image", sample_compression="png")
         for _ in range(10):
             ds.images.jpegs.cats.append(img1)
             ds.images.pngs.flowers.append(img2)
 
-    another_ds = deeplake.dataset(ds.path, token=ds.token,)
+    another_ds = deeplake.dataset(
+        ds.path,
+        token=ds.token,
+    )
     dl = another_ds.dataloader().pytorch(return_index=False, num_workers=0)
     for i, (cat, flower) in enumerate(dl):
         assert cat[0].shape == another_ds.images.jpegs.cats[i].numpy().shape
@@ -487,9 +480,7 @@ def test_pytorch_decode(local_auth_ds, compressed_image_paths, compression):
         ds.image.extend(
             np.array([i * np.ones((10, 10, 3), dtype=np.uint8) for i in range(5)])
         )
-        ds.image.extend(
-            [deeplake.read(compressed_image_paths["jpeg"][0])] * 5
-        )
+        ds.image.extend([deeplake.read(compressed_image_paths["jpeg"][0])] * 5)
 
     ptds = ds.dataloader().pytorch(decode_method={"image": "tobytes"}, num_workers=0)
 
@@ -551,11 +542,7 @@ def test_indexes(local_auth_ds, num_workers):
         for i in range(8):
             ds.xyz.append(i * np.ones((2, 2)))
 
-    ptds = (
-        ds.dataloader()
-        .batch(4)
-        .pytorch(num_workers=num_workers, return_index=True)
-    )
+    ptds = ds.dataloader().batch(4).pytorch(num_workers=num_workers, return_index=True)
     if shuffle:
         ptds = ptds.shuffle()
 
@@ -596,7 +583,9 @@ def test_indexes_transform(local_auth_ds, num_workers):
 
 @requires_torch
 @requires_libdeeplake
-@pytest.mark.parametrize("num_workers", [pytest.param(0), pytest.param(2, marks=pytest.mark.skip)])
+@pytest.mark.parametrize(
+    "num_workers", [pytest.param(0), pytest.param(2, marks=pytest.mark.skip)]
+)
 @pytest.mark.slow
 def test_indexes_transform_dict(local_auth_ds, num_workers):
     ds = local_auth_ds
@@ -861,7 +850,9 @@ def test_pytorch_data_decode(local_auth_ds, cat_path):
     ptds = (
         ds.dataloader()
         .transform(identity)
-        .pytorch(decode_method=decode_method, collate_fn=identity_collate, num_workers=0)
+        .pytorch(
+            decode_method=decode_method, collate_fn=identity_collate, num_workers=0
+        )
     )
     for i, batch in enumerate(ptds):
         sample = batch[0]
