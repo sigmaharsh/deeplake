@@ -41,7 +41,7 @@ class VM(object):
 @enabled_persistent_non_gdrive_dataset_generators
 @pytest.mark.slow
 def test_dataset_locking(ds_generator):
-    deeplake.constants.LOCK_LOCAL_DATASETS = True
+    deeplake.constants.LOCKS_ENABLED = True
     try:
         ds = ds_generator(lock_enabled=True)
         ds.create_tensor("x")
@@ -65,14 +65,14 @@ def test_dataset_locking(ds_generator):
                 np.testing.assert_array_equal(arr, ds.x[0].numpy())
             assert not ws
     finally:
-        deeplake.constants.LOCK_LOCAL_DATASETS = False
+        deeplake.constants.LOCKS_ENABLED = False
 
 
 @requires_non_python11
 @enabled_persistent_non_gdrive_dataset_generators
 @pytest.mark.slow
 def test_vc_locking(ds_generator):
-    deeplake.constants.LOCK_LOCAL_DATASETS = True
+    deeplake.constants.LOCKS_ENABLED = True
     try:
         ds = ds_generator(lock_enabled=True)
         ds.create_tensor("x")
@@ -86,7 +86,7 @@ def test_vc_locking(ds_generator):
             np.testing.assert_array_equal(arr, ds.x[0].numpy())
             assert not ws, str(ws[0])
     finally:
-        deeplake.constants.LOCK_LOCAL_DATASETS = False
+        deeplake.constants.LOCKS_ENABLED = False
 
 
 @requires_non_python11

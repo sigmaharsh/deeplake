@@ -1404,9 +1404,7 @@ class Dataset:
         if isinstance(storage, tuple(_LOCKABLE_STORAGES)) and (
             not self.read_only or self._locked_out
         ):
-            if not deeplake.constants.LOCK_LOCAL_DATASETS and isinstance(
-                storage, LocalProvider
-            ):
+            if not deeplake.constants.LOCKS_ENABLED:
                 return True
             try:
                 # temporarily disable read only on base storage, to try to acquire lock, if exception, it will be again made readonly
@@ -1546,10 +1544,7 @@ class Dataset:
             target_commit = self.version_state["branch_commit_map"][target_id]
         except KeyError:
             pass
-        if isinstance(self.base_storage, tuple(_LOCKABLE_STORAGES)) and not (
-            isinstance(self.base_storage, LocalProvider)
-            and not deeplake.constants.LOCK_LOCAL_DATASETS
-        ):
+        if isinstance(self.base_storage, tuple(_LOCKABLE_STORAGES)) and not deeplake.constants.LOCKS_ENABLED:
             lock_dataset(self, version=target_commit)
             locked = True
         else:
