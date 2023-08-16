@@ -91,60 +91,69 @@ def test_vc_locking(ds_generator):
 
 @requires_non_python11
 def test_lock_thread_leaking(s3_ds_generator):
-    locks = deeplake.core.lock._LOCKS
-    refs = deeplake.core.lock._REFS
-    nlocks_previous = len(locks)
+    deeplake.constants.LOCKS_ENABLED = True
 
-    def nlocks():
-        assert len(locks) == len(refs)
-        return len(locks) - nlocks_previous
+    try:
+        locks = deeplake.core.lock._LOCKS
+        refs = deeplake.core.lock._REFS
+        nlocks_previous = len(locks)
 
-    ds = s3_ds_generator(lock_enabled=True)
-    ds.create_tensor("a")
-    assert nlocks() == 1
+        def nlocks():
+            assert len(locks) == len(refs)
+            return len(locks) - nlocks_previous
 
-    ds.__del__()  # Note: investigate why this doesnt happen automatically. (cyclic refs?)
-    del ds
-    assert nlocks() == 0
+        ds = s3_ds_generator(lock_enabled=True)
+        ds.create_tensor("a")
+        assert nlocks() == 1
 
-    ds = s3_ds_generator(lock_enabled=True)
-    ds.create_tensor("x")
-    ds.x.extend(np.random.random((2, 32)))
-    views = []
-    for i in range(32):
-        views.append(ds[i : i + 1])
+        ds.__del__()  # Note: investigate why this doesnt happen automatically. (cyclic refs?)
+        del ds
+        assert nlocks() == 0
 
-    ds.__del__()
-    del ds
+        ds = s3_ds_generator(lock_enabled=True)
+        ds.create_tensor("x")
+        ds.x.extend(np.random.random((2, 32)))
+        views = []
+        for i in range(32):
+            views.append(ds[i : i + 1])
 
-    assert nlocks() == 1  # 1 because views
+        ds.__del__()
+        del ds
 
-    views[-1].__del__()
-    views.pop()
-    assert nlocks() == 1  # deleting 1 view doesn't release locks
+        assert nlocks() == 1  # 1 because views
 
-    for i in range(len(views)):
-        views[i].__del__()
-    del views
-    assert nlocks() == 0  # 0 because dataset and all views deleted
+        views[-1].__del__()
+        views.pop()
+        assert nlocks() == 1  # deleting 1 view doesn't release locks
+
+        for i in range(len(views)):
+            views[i].__del__()
+        del views
+        assert nlocks() == 0  # 0 because dataset and all views deleted
+    finally:
+        deeplake.constants.LOCKS_ENABLED = False
 
 
 @requires_non_python11
 def test_concurrent_locking(memory_ds):
-    storage = memory_ds.base_storage
+    deeplake.constants.LOCKS_ENABLED = True
+    try:
+        storage = memory_ds.base_storage
 
-    def f(i):
-        lock = deeplake.core.lock.Lock(storage, "lock.lock")
-        with lock:
-            byts = storage.get("meta.json")
-            if byts is None:
-                d = {"x": []}
-            else:
-                d = json.loads(byts.decode("utf-8"))
-            d["x"].append(i)
-            storage["meta.json"] = json.dumps(d).encode("utf-8")
+        def f(i):
+            lock = deeplake.core.lock.Lock(storage, "lock.lock")
+            with lock:
+                byts = storage.get("meta.json")
+                if byts is None:
+                    d = {"x": []}
+                else:
+                    d = json.loads(byts.decode("utf-8"))
+                d["x"].append(i)
+                storage["meta.json"] = json.dumps(d).encode("utf-8")
 
-    n = 10
-    with ThreadPoolExecutor(max_workers=n) as executor:
-        executor.map(f, range(n))
-    assert set(json.loads(storage["meta.json"])["x"]) == set(range(n))
+        n = 10
+        with ThreadPoolExecutor(max_workers=n) as executor:
+            executor.map(f, range(n))
+        assert set(json.loads(storage["meta.json"])["x"]) == set(range(n))
+    finally:
+        deeplake.constants.LOCKS_ENABLED = False
