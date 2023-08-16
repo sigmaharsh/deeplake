@@ -166,10 +166,11 @@ def retrieve_objects_from_memory(object_type=deeplake.core.sample.Sample):
     total_n_of_occurences = 0
     gc_objects = gc.get_objects()
     for item in gc_objects:
-        if isinstance(item, weakref.ref):
-            pass
-        if isinstance(item, object_type):
-            total_n_of_occurences += 1
+        try:
+            if isinstance(item, object_type):
+                total_n_of_occurences += 1
+        except ReferenceError:
+            pass # weakly-referenced object which no longer exists
     return total_n_of_occurences
 
 

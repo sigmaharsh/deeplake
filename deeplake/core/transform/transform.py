@@ -263,78 +263,78 @@ class Pipeline:
             pqueue = compute_provider.create_queue()
         else:
             pbar, pqueue = None, None
-        desc = desc.split()[1]
-        completed = False
-        progress = 0.0
-        for data_in in datas_in:
-            if checkpointing_enabled:
-                target_ds._commit(
-                    f"Auto-commit during deeplake.compute of {desc} after {progress}% progress",
-                    None,
-                    False,
-                    is_checkpoint=True,
-                    total_samples_processed=samples_processed,
-                )
-            progress = round(
-                (samples_processed + len_data_in(data_in)) / total_samples * 100, 2
-            )
-            end = progress == 100
-            progress_args = {"compute_id": compute_id, "progress": progress, "end": end}
-
-            try:
-                self.run(
-                    data_in,
-                    target_ds,
-                    compute_provider,
-                    num_workers,
-                    scheduler,
-                    progressbar,
-                    overwrite,
-                    skip_ok,
-                    read_only_ok and overwrite,
-                    cache_size,
-                    pbar,
-                    pqueue,
-                    ignore_errors,
-                    **kwargs,
-                )
-                target_ds._send_compute_progress(**progress_args, status="success")
-                samples_processed += len_data_in(data_in)
-                completed = end
-            except Exception as e:
+        try:
+            desc = desc.split()[1]
+            completed = False
+            progress = 0.0
+            for data_in in datas_in:
                 if checkpointing_enabled:
-                    print(
-                        "Transform failed. Resetting back to last committed checkpoint."
+                    target_ds._commit(
+                        f"Auto-commit during deeplake.compute of {desc} after {progress}% progress",
+                        None,
+                        False,
+                        is_checkpoint=True,
+                        total_samples_processed=samples_processed,
                     )
-                    target_ds.reset(force=True)
-                target_ds._send_compute_progress(**progress_args, status="failed")
-                close_states(compute_provider, pbar, pqueue)
-                index, sample = None, None
-                if isinstance(e, TransformError):
-                    index, sample = e.index, e.sample
-                    if checkpointing_enabled and isinstance(index, int):
-                        index = samples_processed + index
-                    e = e.__cause__  # type: ignore
-                if isinstance(e, AllSamplesSkippedError):
-                    raise e
-                raise TransformError(
-                    index=index,
-                    sample=sample,
-                    samples_processed=samples_processed,
-                ) from e
-            finally:
-                reload_and_rechunk(
-                    overwrite,
-                    original_data_in,
-                    target_ds,
-                    initial_autoflush,
-                    pad_data_in,
-                    initial_padding_state,
-                    kwargs,
-                    completed,
+                progress = round(
+                    (samples_processed + len_data_in(data_in)) / total_samples * 100, 2
                 )
+                end = progress == 100
+                progress_args = {"compute_id": compute_id, "progress": progress, "end": end}
 
-        close_states(compute_provider, pbar, pqueue)
+                try:
+                    self.run(
+                        data_in,
+                        target_ds,
+                        compute_provider,
+                        num_workers,
+                        scheduler,
+                        progressbar,
+                        overwrite,
+                        skip_ok,
+                        read_only_ok and overwrite,
+                        cache_size,
+                        pbar,
+                        pqueue,
+                        ignore_errors,
+                        **kwargs,
+                    )
+                    target_ds._send_compute_progress(**progress_args, status="success")
+                    samples_processed += len_data_in(data_in)
+                    completed = end
+                except Exception as e:
+                    if checkpointing_enabled:
+                        print(
+                            "Transform failed. Resetting back to last committed checkpoint."
+                        )
+                        target_ds.reset(force=True)
+                    target_ds._send_compute_progress(**progress_args, status="failed")
+                    index, sample = None, None
+                    if isinstance(e, TransformError):
+                        index, sample = e.index, e.sample
+                        if checkpointing_enabled and isinstance(index, int):
+                            index = samples_processed + index
+                        e = e.__cause__  # type: ignore
+                    if isinstance(e, AllSamplesSkippedError):
+                        raise e
+                    raise TransformError(
+                        index=index,
+                        sample=sample,
+                        samples_processed=samples_processed,
+                    ) from e
+                finally:
+                    reload_and_rechunk(
+                        overwrite,
+                        original_data_in,
+                        target_ds,
+                        initial_autoflush,
+                        pad_data_in,
+                        initial_padding_state,
+                        kwargs,
+                        completed,
+                    )
+        finally:
+            close_states(compute_provider, pbar, pqueue)
 
     def run(
         self,

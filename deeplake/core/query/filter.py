@@ -265,9 +265,10 @@ def filter_with_compute(
                 vds_queue.close()
         _del_counter(query_id)
         dataset.is_iteration = initial_is_iteration
-    if vds:
-        vds.autoflush = True
-        vds_thread.join()
+        if vds:
+            vds.autoflush = True
+            vds_thread.join()
+
     return index_map
 
 
