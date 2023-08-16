@@ -41,7 +41,7 @@ def from_tfds(tfds_ds: tensorflow.data.Dataset, ds: Dataset):
     """
     tfds_numpy = tfds.as_numpy(tfds_ds)  # Convert `tf.data.Dataset` to Python generator
 
-    for sample in tqdm(tfds_numpy):
+    for sample in tqdm(tfds_numpy, disable=deeplake.constants.TQDM_DISABLE):
         for col in sample:
             if col not in ds.tensors:
                 ds.create_tensor(col)

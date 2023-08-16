@@ -68,7 +68,7 @@ def update_test(
 @link
 def extend_info(samples, link_creds=None, progressbar=False):
     if progressbar:
-        samples = tqdm.tqdm(samples, desc="Uploading sample meta info...")
+        samples = tqdm.tqdm(samples, desc="Uploading sample meta info...", disable=deeplake.constants.TQDM_DISABLE)
     metas = []
     for sample in samples:
         meta = {}

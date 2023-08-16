@@ -292,7 +292,7 @@ def filter_inplace(
     if progressbar:
         from tqdm import tqdm  # type: ignore
 
-        it = tqdm(it, total=num_samples)
+        it = tqdm(it, total=num_samples, disable=deeplake.constants.TQDM_DISABLE)
 
     query_id = hash_inputs(dataset.path, dataset.pending_commit_id, query_text)
 
@@ -426,7 +426,7 @@ def query_inplace(
         if progressbar:
             from tqdm import tqdm
 
-            bar = tqdm(total=len(dataset))
+            bar = tqdm(total=len(dataset), disable=deeplake.constants.TQDM_DISABLE)
 
             def update(idx, include):
                 bar.update(1)

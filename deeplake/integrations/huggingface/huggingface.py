@@ -149,7 +149,7 @@ def ingest_huggingface(
         features = tqdm(
             src.features.items(),
             desc=f"Converting...({len(skipped_keys)} skipped)",
-            disable=not use_progressbar,
+            disable=deeplake.constants.TQDM_DISABLE or not use_progressbar,
         )
         for key, feature in features:
             if not _create_tensor_from_feature(key, feature, src, ds):

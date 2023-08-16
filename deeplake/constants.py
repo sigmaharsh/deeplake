@@ -195,6 +195,7 @@ SPINNER_ENABLED = not PYTEST_ENABLED
 PROGRESSBAR_ENABLED_DEFAULT = not PYTEST_ENABLED
 
 LOCKS_ENABLED = not PYTEST_ENABLED
+TQDM_DISABLE = PYTEST_ENABLED
 
 # Rechunk after transform if average chunk size is less than
 # this fraction of min chunk size
