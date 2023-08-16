@@ -61,7 +61,7 @@ enabled_cloud_dataset_generators = pytest.mark.parametrize(
 
 @pytest.fixture
 def memory_ds(memory_path):
-    return deeplake.dataset(memory_path)
+    return deeplake.dataset(memory_path, lock_enabled=False)
 
 
 @pytest.fixture

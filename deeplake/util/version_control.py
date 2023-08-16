@@ -192,7 +192,7 @@ def commit(
     commit_message = stored_commit_node.commit_message
     author = stored_commit_node.commit_user_name
     if flush_version_control_info:
-        save_version_info(version_state, storage)
+        save_version_info(version_state, storage, dataset._locking_enabled)
         save_commit_info(stored_commit_node, storage)
         save_commit_info(new_node, storage)
     else:
@@ -263,7 +263,7 @@ def checkout(
         version_state["commit_node_map"][new_commit_id] = new_node
         version_state["branch_commit_map"][address] = new_commit_id
         if flush_version_control_info:
-            save_version_info(version_state, storage)
+            save_version_info(version_state, storage, dataset._locking_enabled)
             save_commit_info(new_node, storage)
             save_commit_info(stored_commit_node, storage)
         else:
@@ -312,12 +312,13 @@ def _squash_main(
 
     try:
         base_storage = get_base_storage(storage)
-        versioncontrol_lock = PersistentLock(
-            base_storage, get_version_control_info_lock_key()
-        )
-        versioncontrol_lock.acquire()  # Blocking
+        if dataset._locking_enabled:
+            versioncontrol_lock = PersistentLock(
+                base_storage, get_version_control_info_lock_key()
+            )
+            versioncontrol_lock.acquire()  # Blocking
 
-        dataset_lock = lock.lock_dataset(dataset, dataset.branches[0])
+            dataset_lock = lock.lock_dataset(dataset, dataset.branches[0])
 
         for tensor in dataset._tensors(
             include_hidden=True, include_disabled=True
@@ -393,8 +394,9 @@ def _squash_main(
         dataset.commit("Squashed commits")
 
     finally:
-        versioncontrol_lock.release()
-        dataset_lock and dataset_lock.release()
+        if dataset._locking_enabled:
+            versioncontrol_lock.release()
+            dataset_lock and dataset_lock.release()
     #
     # dataset._send_branch_deletion_event(branch_name)
 
@@ -425,12 +427,15 @@ def delete_branch(
         raise VersionControlError(f"Branch {branch_name} does not exist")
 
     storage = get_base_storage(storage)
-    versioncontrol_lock = PersistentLock(storage, get_version_control_info_lock_key())
-    versioncontrol_lock.acquire()  # Blocking
+    if dataset._locking_enabled:
+        versioncontrol_lock = PersistentLock(
+            storage, get_version_control_info_lock_key()
+        )
+        versioncontrol_lock.acquire()  # Blocking
 
-    dataset_lock = lock.lock_dataset(
-        dataset, version=dataset.version_state["branch_commit_map"][branch_name]
-    )
+        dataset_lock = lock.lock_dataset(
+            dataset, version=dataset.version_state["branch_commit_map"][branch_name]
+        )
 
     try:
         all_branch_commits = _find_branch_commits(branch_name, version_state)
@@ -474,8 +479,9 @@ def delete_branch(
         _delete_branch_and_commits(branch_name, all_branch_commits, dataset, storage)
 
     finally:
-        versioncontrol_lock.release()
-        dataset_lock and dataset_lock.release()
+        if dataset._locking_enabled:
+            versioncontrol_lock.release()
+            dataset_lock and dataset_lock.release()
 
     dataset._send_branch_deletion_event(branch_name)
 
@@ -691,7 +697,9 @@ def reset_and_checkout(ds, address, err, verbose=True):
         return
 
     ds.checkout(parent_commit_id)
-    new_commit_id = replace_head(storage, version_state, reset_commit_id)
+    new_commit_id = replace_head(
+        storage, version_state, reset_commit_id, ds._locking_enabled
+    )
     ds.checkout(new_commit_id)
 
     current_node = version_state["commit_node_map"][ds.commit_id]
@@ -766,11 +774,16 @@ def load_commit_info(commit_id: str, storage: LRUCache) -> Dict:
     return commit_info
 
 
-def save_version_info(version_state: Dict[str, Any], storage: LRUCache) -> None:
+def save_version_info(
+    version_state: Dict[str, Any],
+    storage: LRUCache,
+    lock_enabled: Optional[bool] = True,
+) -> None:
     """Saves the current version info to the storage."""
     storage = get_base_storage(storage)
-    lock = Lock(storage, get_version_control_info_lock_key(), duration=10)
-    lock.acquire()  # Blocking
+    if lock_enabled:
+        lock = Lock(storage, get_version_control_info_lock_key(), duration=10)
+        lock.acquire()  # Blocking
     key = get_version_control_info_key()
     new_version_info = {
         "commit_node_map": version_state["commit_node_map"],
@@ -790,7 +803,8 @@ def save_version_info(version_state: Dict[str, Any], storage: LRUCache) -> None:
         except KeyError:
             version_info = new_version_info
     storage[key] = json.dumps(_version_info_to_json(version_info)).encode("utf-8")
-    lock.release()
+    if lock_enabled:
+        lock.release()
 
 
 def load_version_info(storage: LRUCache) -> Dict:
@@ -836,7 +850,7 @@ def _create_new_head(storage, version_state, branch, parent_commit_id, new_commi
     return new_node
 
 
-def _replace_head(storage, version_state, commit_id, new_head):
+def _replace_head(storage, version_state, commit_id, new_head, lock_enabled):
     parent_node = new_head.parent
     del version_state["commit_node_map"][commit_id]
     for i, child in enumerate(parent_node.children):
@@ -844,7 +858,7 @@ def _replace_head(storage, version_state, commit_id, new_head):
             parent_node.children[i] = new_head
             break
 
-    save_version_info(version_state, storage)
+    save_version_info(version_state, storage, lock_enabled)
 
 
 def delete_version_from_storage(storage, commit_id):
@@ -853,7 +867,7 @@ def delete_version_from_storage(storage, commit_id):
     storage.flush()
 
 
-def replace_head(storage, version_state, reset_commit_id):
+def replace_head(storage, version_state, reset_commit_id, lock_enabled=True):
     """Replace HEAD of current branch with new HEAD"""
     branch = version_state["commit_node_map"][reset_commit_id].branch
     parent_commit_id = version_state["commit_id"]
@@ -863,7 +877,7 @@ def replace_head(storage, version_state, reset_commit_id):
         storage, version_state, branch, parent_commit_id, new_commit_id
     )
 
-    _replace_head(storage, version_state, reset_commit_id, new_node)
+    _replace_head(storage, version_state, reset_commit_id, new_node, lock_enabled)
 
     delete_version_from_storage(storage, reset_commit_id)
 

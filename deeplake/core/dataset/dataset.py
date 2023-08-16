@@ -2457,7 +2457,7 @@ class Dataset:
 
     def _flush_vc_info(self):
         if self._vc_info_updated:
-            save_version_info(self.version_state, self.storage)
+            save_version_info(self.version_state, self.storage, self._locking_enabled)
             for node in self.version_state["commit_node_map"].values():
                 if node._info_updated:
                     save_commit_info(node, self.storage)
@@ -3293,6 +3293,9 @@ class Dataset:
     def _lock_queries_json(self):
         class _LockQueriesJson:
             def __enter__(self2):
+                if not self._locking_enabled:
+                    return
+
                 storage = self.base_storage
                 self2.storage_read_only = storage.read_only
                 if self._locked_out:
@@ -3303,6 +3306,9 @@ class Dataset:
                 self2.lock = lock
 
             def __exit__(self2, *_, **__):
+                if not self._locking_enabled:
+                    return
+
                 self2.lock.release()
                 self.base_storage.read_only = self2.storage_read_only
 
@@ -4173,7 +4179,9 @@ class Dataset:
             # checkout to get list of tensors in previous commit, needed for copying metas and create_commit_chunk_set
             self.checkout(parent_commit_id)
 
-            new_commit_id = replace_head(storage, version_state, reset_commit_id)
+            new_commit_id = replace_head(
+                storage, version_state, reset_commit_id, self._locking_enabled
+            )
 
             self.checkout(new_commit_id)
 

@@ -300,7 +300,7 @@ class dataset:
                         "Try using `reset=True` to reset HEAD changes and load the previous commit."
                     ) from e
                 return dataset._reset_and_load(
-                    cache_chain, access_method, dataset_kwargs, address, e
+                    cache_chain, access_method, dataset_kwargs, address, e, lock_enabled
                 )
             raise e
 
@@ -662,12 +662,14 @@ class dataset:
                         "This will delete all uncommitted changes on the branch you are trying to load."
                     ) from e
                 return dataset._reset_and_load(
-                    cache_chain, access_method, dataset_kwargs, address, e
+                    cache_chain, access_method, dataset_kwargs, address, e, lock_enabled
                 )
             raise e
 
     @staticmethod
-    def _reset_and_load(storage, access_method, dataset_kwargs, address, err):
+    def _reset_and_load(
+        storage, access_method, dataset_kwargs, address, err, lock_enabled
+    ):
         """Reset and then load the dataset. Only called when loading dataset errored out with ``err``."""
         if access_method != "stream":
             dataset_kwargs["reset"] = True
@@ -701,7 +703,9 @@ class dataset:
         # load previous version, replace head and checkout to new head
         dataset_kwargs["address"] = parent_commit_id
         ds = dataset._load(dataset_kwargs, access_method)
-        new_commit_id = replace_head(storage, ds.version_state, reset_commit_id)
+        new_commit_id = replace_head(
+            storage, ds.version_state, reset_commit_id, lock_enabled
+        )
         ds.checkout(new_commit_id)
 
         current_node = ds.version_state["commit_node_map"][ds.commit_id]
