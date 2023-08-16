@@ -1,3 +1,5 @@
+import weakref
+
 import deeplake
 import pytest
 import numpy as np
@@ -164,6 +166,8 @@ def retrieve_objects_from_memory(object_type=deeplake.core.sample.Sample):
     total_n_of_occurences = 0
     gc_objects = gc.get_objects()
     for item in gc_objects:
+        if isinstance(item, weakref.ref):
+            pass
         if isinstance(item, object_type):
             total_n_of_occurences += 1
     return total_n_of_occurences
@@ -1087,7 +1091,6 @@ def test_transform_bug_link(local_ds, cat_path):
 
 
 @pytest.mark.slow
-@pytest.mark.flaky(reruns=3)
 def test_tensor_dataset_memory_leak(local_ds):
     local_ds.create_tensor("image", htype="image", sample_compression="png")
     add_images().eval(list(range(100)), local_ds, scheduler="threaded")
