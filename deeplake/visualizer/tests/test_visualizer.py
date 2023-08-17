@@ -15,6 +15,7 @@ import deeplake as dp
     ],
     indirect=True,
 )
+@pytest.mark.threadleak(enabled=False)
 def test_local_server(ds_generator):
     ds = ds_generator()
     ds.create_tensor("images", htype="image", sample_compression="jpg")

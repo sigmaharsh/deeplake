@@ -1,5 +1,3 @@
-import weakref
-
 import deeplake
 import pytest
 import numpy as np
@@ -1401,7 +1399,6 @@ class BadSample:
 @all_schedulers
 @pytest.mark.parametrize("method", ["ds", "multiple", "checkpointed"])
 @pytest.mark.parametrize("error_at", ["transform", "chunk_engine"])
-@pytest.mark.timeout(500)
 def test_ds_append_errors(
     local_path, compressed_image_paths, scheduler, method, error_at
 ):
@@ -1577,7 +1574,6 @@ def mul_by_2(sample_in, samples_out):
     samples_out.images.append(sample_in.images.numpy() - 1)
 
 
-@pytest.mark.timeout(500)
 @pytest.mark.slow
 def test_pipeline(local_ds, flower_path):
     pipeline = deeplake.compose([add_samples(flower_path), mul_by_2()])

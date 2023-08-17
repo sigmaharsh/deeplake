@@ -14,7 +14,6 @@ def get_progress_bar(total_length, desc):
         total=total_length,
         desc=desc,
         bar_format="{desc}: {percentage:.0f}%|{bar}| {n:.0f}/{total_fmt} [{elapsed}<{remaining}",
-        disable=constants.TQDM_DISABLE,
     )
 
 

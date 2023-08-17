@@ -79,7 +79,6 @@ class _COCO(pycocotools_coco.COCO):
             enumerate(self.dataset),
             desc="loading annotations",
             total=len(self.dataset),
-            disable=deeplake.constants.TQDM_DISABLE,
         ):
             if all_imgs[row_index].size == 0:
                 always_warn(

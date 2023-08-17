@@ -821,7 +821,7 @@ class ChunkEngine:
         if register and update_commit_diff:
             commit_diff = self.commit_diff
         if progressbar:
-            pbar = tqdm(total=len(samples), disable=deeplake.constants.TQDM_DISABLE)
+            pbar = tqdm(total=len(samples))
         if not isinstance(samples, list) and not (
             isinstance(samples, np.ndarray) and self._numpy_extend_optimization_enabled
         ):
@@ -996,7 +996,7 @@ class ChunkEngine:
 
     def _extend(self, samples, progressbar, pg_callback=None, update_commit_diff=True):
         if isinstance(samples, deeplake.Tensor):
-            samples = tqdm(samples, disable=deeplake.constants.TQDM_DISABLE) if progressbar else samples
+            samples = tqdm(samples) if progressbar else samples
             for sample in samples:
                 self._extend(
                     [sample],
@@ -1038,7 +1038,7 @@ class ChunkEngine:
             self.cache.autoflush = False
 
             if self.is_sequence:
-                samples = tqdm(samples, disable=deeplake.constants.TQDM_DISABLE) if progressbar else samples
+                samples = tqdm(samples) if progressbar else samples
                 verified_samples = []
                 num_samples_added = 0
                 try:

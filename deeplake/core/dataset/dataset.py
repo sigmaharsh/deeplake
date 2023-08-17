@@ -2088,7 +2088,7 @@ class Dataset:
         )
 
         if progressbar:
-            dataloader = tqdm(dataloader, desc=self.path, total=len(self) // batch_size, disable=deeplake.constants.TQDM_DISABLE)
+            dataloader = tqdm(dataloader, desc=self.path, total=len(self) // batch_size)
         dataset_read(self)
         return dataloader
 
@@ -3095,7 +3095,7 @@ class Dataset:
             )
         with self:
             if progressbar:
-                indices = tqdm(range(n), disable=deeplake.constants.TQDM_DISABLE)
+                indices = tqdm(range(n))
             else:
                 indices = range(n)
             for i in indices:

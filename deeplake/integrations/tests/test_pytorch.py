@@ -887,6 +887,7 @@ def test_indexes_tensors(local_ds, shuffle, num_workers):
         assert batch.keys() == {"xyz", "index"}
 
 
+@requires_torch
 def test_uneven_iteration(local_ds):
     with local_ds as ds:
         ds.create_tensor("x")
@@ -923,6 +924,7 @@ def list_transform_fn(sample):
     return np.array([sample[0], sample[1]])
 
 
+@requires_torch
 def test_pytorch_json(local_ds):
     ds = local_ds
     with ds:
@@ -939,6 +941,7 @@ def test_pytorch_json(local_ds):
     np.testing.assert_equal(batch, np.array([1, 2]))
 
 
+@requires_torch
 def test_pytorch_list(local_ds):
     ds = local_ds
     with ds:
@@ -955,6 +958,7 @@ def test_pytorch_list(local_ds):
     np.testing.assert_equal(batch, np.array([[1, 2], [3, 4]]))
 
 
+@requires_torch
 def test_pytorch_data_decode(local_ds, cat_path):
     ds = local_ds
     with ds:

@@ -41,7 +41,6 @@ class ShuffleBuffer:
             unit="B",
             unit_scale=True,
             unit_divisor=1024,
-            disable=deeplake.constants.TQDM_DISABLE,
         )
         self.pbar_closed = False
 
