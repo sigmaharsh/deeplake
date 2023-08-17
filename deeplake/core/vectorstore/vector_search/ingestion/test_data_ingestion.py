@@ -90,7 +90,7 @@ def test_ingest_data(local_path):
         dataset=dataset,
         elements=data,
         ingestion_batch_size=1024,
-        num_workers=2,
+        num_workers=0,
         logger=None,
     )
 
@@ -126,7 +126,7 @@ def test_ingest_data(local_path):
         elements=extended_data,
         embedding_function=[embedding_function],
         ingestion_batch_size=1024,
-        num_workers=2,
+        num_workers=0,
         embedding_tensor=["embedding"],
     )
     assert len(dataset) == 20008
@@ -139,7 +139,7 @@ def test_ingest_data(local_path):
             elements=extended_data,
             embedding_function=[embedding_function],
             ingestion_batch_size=1024,
-            num_workers=2,
+            num_workers=0,
             embedding_tensor=["embedding"],
         )
 
@@ -163,7 +163,7 @@ def test_ingest_data(local_path):
             dataset=dataset,
             elements=data,
             ingestion_batch_size=1000,
-            num_workers=2,
+            num_workers=0,
         )
 
     extended_data = extended_data * 10
@@ -173,7 +173,7 @@ def test_ingest_data(local_path):
             elements=extended_data,
             embedding_function=[embedding_function],
             ingestion_batch_size=1024,
-            num_workers=2,
+            num_workers=0,
             embedding_tensor=["embedding"],
         )
 
@@ -183,6 +183,6 @@ def test_ingest_data(local_path):
             elements=extended_data,
             embedding_function=[corrupted_embedding_function],
             ingestion_batch_size=0,
-            num_workers=2,
+            num_workers=0,
             embedding_tensor=["embedding"],
         )
