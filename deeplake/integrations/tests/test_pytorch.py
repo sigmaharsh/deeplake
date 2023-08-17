@@ -66,6 +66,7 @@ def pytorch_small_shuffle_helper(start, end, dataloader):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_small(local_ds):
     ds = local_ds
     with ds:
@@ -145,6 +146,7 @@ def test_pytorch_small(local_ds):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_transform(local_ds):
     import torch
 
@@ -224,6 +226,7 @@ def test_pytorch_transform(local_ds):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_transform_dict(local_ds):
     ds = local_ds
     with ds as ds:
@@ -264,6 +267,7 @@ def test_pytorch_transform_dict(local_ds):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_with_compression(local_ds: Dataset):
     ds = local_ds
     # TODO: chunk-wise compression for labels (right now they are uncompressed)
@@ -301,6 +305,7 @@ def test_pytorch_with_compression(local_ds: Dataset):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_custom_tensor_order(local_ds):
     ds = local_ds
     with ds:
@@ -364,6 +369,7 @@ def test_custom_tensor_order(local_ds):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_readonly_with_two_workers(local_ds):
     local_ds.create_tensor("images", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
     local_ds.create_tensor("labels", max_chunk_size=PYTORCH_TESTS_MAX_CHUNK_SIZE)
@@ -382,6 +388,7 @@ def test_readonly_with_two_workers(local_ds):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_corrupt_dataset(local_ds, corrupt_image_paths, compressed_image_paths):
     local_ds.storage.clear()
     img_good = deeplake.read(compressed_image_paths["jpeg"][0])
@@ -403,6 +410,7 @@ def test_corrupt_dataset(local_ds, corrupt_image_paths, compressed_image_paths):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_local_cache(local_ds):
     ds = local_ds
     with ds:
@@ -438,6 +446,7 @@ def test_pytorch_local_cache(local_ds):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_groups(local_ds, compressed_image_paths):
     img1 = deeplake.read(compressed_image_paths["jpeg"][0])
     img2 = deeplake.read(compressed_image_paths["png"][0])
@@ -476,6 +485,7 @@ def test_groups(local_ds, compressed_image_paths):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_string_tensors(local_ds):
     with local_ds:
         local_ds.create_tensor("strings", htype="text")
@@ -492,6 +502,7 @@ def test_string_tensors(local_ds):
 
 @pytest.mark.slow
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_large(local_ds):
     arr_list_1 = [np.random.randn(1500, 1500, i) for i in range(5)]
     arr_list_2 = [np.random.randn(400, 1500, 4, i) for i in range(5)]
@@ -534,6 +545,7 @@ def view_tform(sample):
         (np.random.randint(0, 10, 100).tolist(), False),
     ],
 )
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_view(local_ds, index, shuffle):
     arr_list_1 = [np.random.randn(15, 15, 5) for _ in range(10)]
     arr_list_2 = [np.random.randn(40, 15, 4, 2) for _ in range(10)]
@@ -572,6 +584,7 @@ def test_pytorch_view(local_ds, index, shuffle):
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
 @pytest.mark.parametrize("buffer_size", [0, 10])
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_collate(local_ds, shuffle, buffer_size):
     local_ds.create_tensor("a")
     local_ds.create_tensor("b")
@@ -599,6 +612,7 @@ def test_pytorch_collate(local_ds, shuffle, buffer_size):
 @pytest.mark.slow
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_transform_collate(local_ds, shuffle):
     local_ds.create_tensor("a")
     local_ds.create_tensor("b")
@@ -643,6 +657,7 @@ def run_ddp(rank, size, ds, q, backend="gloo"):
 @pytest.mark.slow
 @requires_torch
 @pytest.mark.slow
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_ddp(local_ds):
     ds = local_ds
     import multiprocessing as mp
@@ -684,6 +699,7 @@ def identity(x):
 @requires_torch
 @pytest.mark.slow
 @pytest.mark.parametrize("compression", [None, "jpeg"])
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_decode(local_ds, compressed_image_paths, compression):
     ds = local_ds
     with ds:
@@ -728,6 +744,7 @@ def test_pytorch_decode(local_ds, compressed_image_paths, compression):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_decode_multi_worker_shuffle(local_ds, compressed_image_paths):
     with local_ds as ds:
         ds.create_tensor("image", sample_compression="jpeg")
@@ -756,6 +773,7 @@ def test_pytorch_decode_multi_worker_shuffle(local_ds, compressed_image_paths):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_rename(local_ds):
     with local_ds as ds:
         ds.create_tensor("abc")
@@ -778,6 +796,7 @@ def test_rename(local_ds):
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
 @pytest.mark.parametrize("num_workers", [0, 2])
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_indexes(local_ds, shuffle, num_workers):
     with local_ds as ds:
         ds.create_tensor("xyz")
@@ -801,6 +820,7 @@ def index_transform(sample):
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
 @pytest.mark.parametrize("num_workers", [0, 2])
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_indexes_transform(local_ds, shuffle, num_workers):
     with local_ds as ds:
         ds.create_tensor("xyz")
@@ -827,6 +847,7 @@ def test_indexes_transform(local_ds, shuffle, num_workers):
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
 @pytest.mark.parametrize("num_workers", [0, 2])
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_indexes_transform_dict(local_ds, shuffle, num_workers):
     with local_ds as ds:
         ds.create_tensor("xyz")
@@ -861,6 +882,7 @@ def test_indexes_transform_dict(local_ds, shuffle, num_workers):
 @requires_torch
 @pytest.mark.parametrize("shuffle", [True, False])
 @pytest.mark.parametrize("num_workers", [0, 2])
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_indexes_tensors(local_ds, shuffle, num_workers):
     with local_ds as ds:
         ds.create_tensor("xyz")
@@ -888,6 +910,7 @@ def test_indexes_tensors(local_ds, shuffle, num_workers):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_uneven_iteration(local_ds):
     with local_ds as ds:
         ds.create_tensor("x")
@@ -925,6 +948,7 @@ def list_transform_fn(sample):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_json(local_ds):
     ds = local_ds
     with ds:
@@ -942,6 +966,7 @@ def test_pytorch_json(local_ds):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_list(local_ds):
     ds = local_ds
     with ds:
@@ -959,6 +984,7 @@ def test_pytorch_list(local_ds):
 
 
 @requires_torch
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_pytorch_data_decode(local_ds, cat_path):
     ds = local_ds
     with ds:

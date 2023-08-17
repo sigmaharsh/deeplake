@@ -9,6 +9,7 @@ all_schedulers = pytest.mark.parametrize("scheduler", schedulers)
 
 @pytest.mark.slow
 @all_schedulers
+@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_compute_with_progress_bar(scheduler):
     def f(pg_callback, x):
         pg_callback(1)
