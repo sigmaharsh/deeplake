@@ -67,8 +67,6 @@ class Lock(object):
                 storage.enable_readonly()
 
     def refresh_lock(self):
-        if not deeplake.constants.LOCKS_ENABLED:
-            return
         storage = self.storage
         path = self.path
         byts = storage.get(path)
@@ -200,6 +198,7 @@ class PersistentLock(Lock):
 
         if self.acquired:
             return
+        assert False, "DON'T AQUIRE LOCKS"
         self.lock.acquire(timeout=self.timeout)
         self._thread = threading.Thread(target=self._lock_loop, daemon=True)
         self._thread.start()
