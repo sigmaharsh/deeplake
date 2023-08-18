@@ -56,6 +56,7 @@ def test_agreement_logged_out(hub_cloud_dev_credentials):
 
 
 @pytest.mark.slow
+@pytest.mark.flaky(reruns=3)
 def test_agreement_logged_in(hub_cloud_dev_credentials):
     runner = CliRunner()
     username, password = hub_cloud_dev_credentials

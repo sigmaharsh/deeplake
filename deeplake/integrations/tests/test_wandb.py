@@ -6,7 +6,6 @@ import wandb
 
 
 @pytest.mark.slow
-@pytest.mark.skip(reason="TODO: Temporarily disabled")
 def test_wandb(hub_cloud_path, hub_cloud_dev_token):
     run = wandb.init(mode="offline")
     ds = deeplake.empty(hub_cloud_path, token=hub_cloud_dev_token, overwrite=True)
